@@ -1,0 +1,30 @@
+import { config, fields, collection } from '@keystatic/core';
+
+export default config({
+  // Utilizziamo 'local' per scrivere direttamente nei file di Git; 
+  // su Cloudflare verificheremo le modifiche tramite push.
+  storage: {
+    kind: 'local',
+  },
+  collections: {
+    projects: collection({
+      label: 'Progetti Portfolio',
+      slugField: 'title',
+      path: 'src/content/projects/*/',
+      format: { contentField: 'content' },
+      schema: {
+        title: fields.slug({ name: { label: 'Titolo Progetto' } }),
+        tagline: fields.text({ label: 'Sottotitolo / Tagline ad impatto' }),
+        r2VideoUrl: fields.url({ 
+          label: 'URL Video HLS (.m3u8) da Cloudflare R2',
+          description: 'Incolla qui il link al file .m3u8 generato dalla nostra pipeline' 
+        }),
+        coverImage: fields.text({
+          label: 'Path o URL Immagine Cover HD',
+          defaultValue: '/favicon.svg'
+        }),
+        content: fields.markdoc({ label: 'Case Study & Dettagli Progetto' }),
+      },
+    }),
+  },
+});

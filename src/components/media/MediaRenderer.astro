@@ -50,7 +50,7 @@ const getReelsGridCols = (cols: string, isDivided = false, mobileCols = '2') => 
   }
 };
 
-const allMediaFiles = import.meta.glob('/src/assets/projects/**/*.{jpeg,jpg,png,webp,avif,gif,mp4,webm,mov}', { eager: true });
+const allMediaFiles = import.meta.glob('/public/projects/**/*.{jpeg,jpg,png,webp,avif,gif,mp4,webm,mov}', { eager: true });
 
 const resolveMediaItem = (pathOrObj: any, caption?: string) => {
   let url = pathOrObj;

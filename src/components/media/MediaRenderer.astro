@@ -105,48 +105,28 @@ const animatedLoopsItems = data.folderName ? getFolderMedia(data.folderName, 60)
   );
 })()}
 
-{/* === 02. TOP PREVIEW GRID 8x2 (Universal Auto-Slider: Desktop & Mobile) === */}
+{/* === 02. TOP PREVIEW GRID 8x2 === */}
 {type === 'gridTop8x2' && grid8x2Items.length > 0 && (
   <div class="w-full my-8 sm:my-10 md:my-12 shrink-0 block">
-
-    {/* DESKTOP SLIDESHOW (Visibile da 'sm' in su) */}
-    <auto-slider class="hidden sm:block relative w-full aspect-video bg-zinc-900 overflow-hidden border border-zinc-800/80">
+    <div class="flex justify-between items-center font-mono text-xs uppercase tracking-widest text-zinc-500 mb-4 border-b border-zinc-900/50 pb-3 select-none">
+      <span>// {data.sectionCaption || 'PREVIEW ARCHIVE — CLICCA PER INGRANDIRE'}</span>
+      <span>FRAMES: ({grid8x2Items.length})</span>
+    </div>
+    
+    {/* SLIDESHOW ORA UNIVERSALE (Ripristinato) */}
+    <mobile-auto-slider class="block relative w-full aspect-video bg-zinc-900 overflow-hidden border border-zinc-800/80">
       {grid8x2Items.map((item: any, idx: number) => (
-        <div 
-          data-lightbox-index={!item.isYouTube && !item.isHls ? idx : null} 
-          data-src={item.url} 
-          class={`slide absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0 z-0 ${!item.isYouTube && !item.isHls ? 'cursor-pointer' : ''}`}
-        >
+        <div data-lightbox-index={!item.isYouTube && !item.isHls ? idx : null} data-src={item.url} class={`slide absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0 z-0 ${!item.isYouTube && !item.isHls ? 'cursor-pointer' : ''}`}>
           {item.isYouTube || item.isHls ? (
              <MediaElement media={item} />
           ) : item.isLoopVideo ? (
             <video src={item.url} autoplay loop muted playsinline class="w-full h-full object-cover block pointer-events-none" />
           ) : (
-            <img src={item.url} alt={`Frame ${idx + 1}`} loading="lazy" class="w-full h-full object-cover block" />
-          )}
-        </div>
-      ))}
-    </auto-slider>
-
-    {/* MOBILE SLIDESHOW (Visibile solo sotto 'sm') */}
-    <mobile-auto-slider class="block sm:hidden relative w-full aspect-video bg-zinc-900 overflow-hidden border border-zinc-800/80">
-      {grid8x2Items.map((item: any, idx: number) => (
-        <div 
-          data-lightbox-index={!item.isYouTube && !item.isHls ? idx : null} 
-          data-src={item.url} 
-          class={`slide absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0 z-0 ${!item.isYouTube && !item.isHls ? 'cursor-pointer' : ''}`}
-        >
-          {item.isYouTube || item.isHls ? (
-             <MediaElement media={item} />
-          ) : item.isLoopVideo ? (
-            <video src={item.url} autoplay loop muted playsinline class="w-full h-full object-cover block pointer-events-none" />
-          ) : (
-            <img src={item.url} alt={`Frame ${idx + 1}`} loading="lazy" class="w-full h-full object-cover block" />
+            <img src={item.url} alt={`Frame ${idx + 1}`} class="w-full h-full object-cover block" />
           )}
         </div>
       ))}
     </mobile-auto-slider>
-
   </div>
 )}
 
@@ -405,7 +385,7 @@ const animatedLoopsItems = data.folderName ? getFolderMedia(data.folderName, 60)
 )}
 
 <script>
-  class AutoSlider extends HTMLElement {
+  class MobileAutoSlider extends HTMLElement {
     interval: number | undefined;
     slides: NodeListOf<Element> | undefined;
     currentIndex: number = 0;
@@ -431,7 +411,7 @@ const animatedLoopsItems = data.folderName ? getFolderMedia(data.folderName, 60)
           
           this.slides[this.currentIndex].classList.remove('opacity-0', 'z-0');
           this.slides[this.currentIndex].classList.add('opacity-100', 'z-10');
-        }, 2000); // Cambia immagine ogni 2 secondi
+        }, 2000); 
       }
     }
     
@@ -440,28 +420,34 @@ const animatedLoopsItems = data.folderName ? getFolderMedia(data.folderName, 60)
     }
   }
   
-  if (!customElements.get('auto-slider')) {
-    customElements.define('auto-slider', AutoSlider);
+  if (!customElements.get('mobile-auto-slider')) {
+    customElements.define('mobile-auto-slider', MobileAutoSlider);
   }
 
   // ==========================================
   // LA TUA LOGICA DI BYPASS GLOBALE (MP4/WEBM)
   // ==========================================
   document.addEventListener('astro:page-load', () => {
+    // Aspettiamo 1 secondo per vedere se i video partono naturalmente
     setTimeout(() => {
       document.querySelectorAll('video').forEach((video) => {
+        // Ignoriamo i player HLS perché hanno già il loro bypass nel file HlsPlayer.astro
         if (video.hasAttribute('data-hls-player')) return;
 
+        // Se il video è nativo ed è in stallo (0 dati scaricati) o ha dato un errore fatale
         if (video.readyState === 0 || video.error) {
           console.warn("Bypass MP4: Video in stallo rilevato. Forzo il ricaricamento nativo...");
           
           const currentSrc = video.src;
           if (currentSrc) {
+            // Svuota e ricarica il tag
             video.src = '';
             video.load();
             video.src = currentSrc;
-            video.muted = true;
+            video.muted = true; // Necessario per bypassare i blocchi autoplay
             video.load();
+            
+            // Forza il riavvio
             video.play().catch(() => {});
           }
         }

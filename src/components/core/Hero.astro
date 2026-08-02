@@ -3,61 +3,85 @@ import ShaderCanvas from './HeroShader.astro';
 ---
 
 <!-- 
-  SEZIONE HERO FULL-BLEED:
-  - Dynamic Viewport Height h-[100dvh] per evitare il taglio in basso su Chrome mobile.
+  SEZIONE HERO FULL-BLEED
 -->
-<section class="w-screen relative left-1/2 -translate-x-1/2 h-screen h-[100dvh] flex flex-col justify-between pt-20 pb-6 md:pt-32 md:pb-12 px-5 sm:px-8 md:px-10 lg:px-12 select-none [touch-action:pan-y] overflow-hidden">  
+<section class="w-screen relative left-1/2 -translate-x-1/2 flex flex-col justify-between pt-10 pb-6 px-5 sm:px-8 md:px-10 lg:px-12 select-none [touch-action:pan-y] overflow-hidden min-h-screen">  
   
   <ShaderCanvas />
 
   <!-- Glow di sfondo con blend-mode -->
   <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-amber-900/10 via-zinc-800/10 to-transparent blur-[120px] pointer-events-none -z-10 mix-blend-screen"></div>
 
-  <div class="w-full"></div>
-
-  <!-- Centro: Copy & Icona Wireframe -->
-  <div class="reveal-ui opacity-0 translate-y-8 flex flex-col items-center text-center max-w-2xl mx-auto my-auto z-10 pointer-events-none mix-blend-difference text-white transform-gpu will-change-[transform,opacity] antialiased">
-    <div class="mb-8 animate-pulse text-white/50">
-      <svg class="w-10 h-10 mx-auto stroke-current" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      </svg>
-    </div>
-  </div> 
-
-  <!-- Bottom: Titolo e Ruolo -->
-  <div class="w-full mt-auto pb-2 md:pb-0 z-10 pointer-events-none mix-blend-difference text-white shrink-0">
+  <!-- 
+    =======================================================
+    1. TITOLO MONUMENTALE + CREATIVE TECHNOLOGIST (In Alto)
+    =======================================================
+  -->
+  <div class="w-full z-10 pointer-events-none mix-blend-difference text-white shrink-0 pb-4">
     <div class="w-full flex flex-col">
-      <h1 class="sr-only">ENRICO SCIGLIUTO</h1>
+      <h1 class="sr-only">ENRICO SCIGLIUTO — CREATIVE TECHNOLOGIST</h1>
       
       <!-- 
-        CONTENITORE FULL-BLEED SENZA MARGINI:
-        - mx-[-1.25rem] sm:mx-[-2rem] md:mx-[-2.5rem] lg:mx-[-3rem]: 
-          I margini negativi ANNULLANO esattamente il padding della sezione (px-5, sm:px-8, etc.), 
-          spingendo il titolo a toccare fisicamente i bordi dello schermo se lo desideri, oppure i bordi reali del layout.
+        CONTENITORE ALLINEATO AI MARGINI INTERNI DEL CANVAS (SENZA SBORDARE):
+        Occupa esattamente la larghezza da margine sx a margine dx del contenitore px-5/px-12.
       -->
       <div class="reveal-ui opacity-0 translate-y-12 hero-title block w-full overflow-visible transform-gpu will-change-[transform,opacity]">
         <svg 
-          viewBox="0 0 940 90" 
+          viewBox="0 0 995 100" 
           class="w-full h-auto block overflow-visible" 
           aria-hidden="true"
           preserveAspectRatio="none"
         >
+          <!-- 
+            - x="0" e textLength="1000": riempie esattamente la larghezza da margine sx a margine dx del canvas.
+            - letter-spacing="-0.04em": stringe il kerning rendendo il testo compatto.
+            - font-size="105": ingrandisce al massimo il titolo nel canvas.
+          -->
           <text 
             x="0" 
-            y="50%" 
+            y="52%" 
             dominant-baseline="central" 
-            textLength="940" 
+            textLength="1000" 
             lengthAdjust="spacingAndGlyphs" 
             class="font-display fill-white uppercase font-black" 
-            font-size="95"
+            font-size="105"
+            letter-spacing="-0.04em"
           >
             ENRICO SCIGLIUTO
           </text>
         </svg>
       </div>
 
-      <p class="reveal-ui opacity-0 translate-y-8 text-right font-sans font-light text-lg sm:text-2xl md:text-4xl opacity-70 tracking-tight mt-1 md:mt-2 [font-optical-sizing:auto] mr-1 sm:mr-4 md:mr-2 text-white transform-gpu will-change-[transform,opacity]">
+      <!-- Ruolo/Qualifica allineato a destra -->
+      <p class="reveal-ui opacity-0 translate-y-8 translate-x-4 text-right font-sans font-light text-lg sm:text-2xl md:text-4xl opacity-70 tracking-tight mt-0 md:mt-0 [font-optical-sizing:auto] mr-1 sm:mr-4 md:mr-2 text-white transform-gpu will-change-[transform,opacity]">
         Creative Technologist
       </p>
     </div>
   </div>
+
+  <!-- 
+    =======================================================
+    2. NAVBAR GIUSTIFICATA NELL'HERO
+    - Trasla fisicamente sull'asse Y al movimento dello scroll
+    =======================================================
+  -->
+  <header 
+    id="hero-navbar"
+    class="w-full z-40 py-0 bg-transparent my-4 mix-blend-difference transform-gpu transition-all duration-500 ease-out translate-y--0 opacity-100"
+  >
+    <nav class="w-full flex items-center justify-between text-xs uppercase tracking-widest font-medium text-zinc-400">
+      <a href="/#work" class="hover:text-white transition-colors">Works</a>
+      <a href="/#about" class="hover:text-white transition-colors">About Me</a>
+      <a href="/#contacts" class="hover:text-white transition-colors">Contacts</a>
+    </nav>
+  </header>
+
+  <!-- Spazio centrale Hero -->
+  <div class="reveal-ui opacity-0 translate-y-8 flex flex-col items-center text-center max-w-2xl mx-auto my-auto z-10 pointer-events-none mix-blend-difference text-white transform-gpu will-change-[transform,opacity] antialiased py-12">
+    <div class="animate-pulse text-white/50">
+      <svg class="w-10 h-10 mx-auto stroke-current" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      </svg>
+    </div>
+  </div> 
+
 </section>

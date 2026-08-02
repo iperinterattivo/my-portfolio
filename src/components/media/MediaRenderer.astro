@@ -359,6 +359,13 @@ const animatedLoopsItems = data.folderName ? getFolderMedia(data.folderName, 60)
           height={1080}
           class="w-full h-full object-contain block mx-auto" 
         />
+      ) : block.value.leftType === 'imageR2' && block.value.leftR2 ? (
+        <img 
+          src={block.value.leftR2} 
+          alt="Left view R2" 
+          loading="lazy"
+          class="w-full h-full object-contain block mx-auto" 
+        />
       ) : block.value.leftType === 'video' && block.value.leftR2 ? (
         <video 
           src={block.value.leftR2} 
@@ -376,6 +383,13 @@ const animatedLoopsItems = data.folderName ? getFolderMedia(data.folderName, 60)
           alt="Right view" 
           width={1920} 
           height={1080}
+          class="w-full h-full object-contain block mx-auto" 
+        />
+      ) : block.value.rightType === 'imageR2' && block.value.rightR2 ? (
+        <img 
+          src={block.value.rightR2} 
+          alt="Right view R2" 
+          loading="lazy"
           class="w-full h-full object-contain block mx-auto" 
         />
       ) : block.value.rightType === 'video' && block.value.rightR2 ? (

@@ -293,12 +293,32 @@ export default config({
             schema: fields.object({
               sectionCaption: sectionCaptionField,
               mobileStack: mobileStackField,
-              leftType: mediaTypeField,
-              leftImage: fields.image({ label: 'Immagine Sinistra', directory: 'src/assets/projects/m13l', publicPath: '/src/assets/projects/m13l/' }),
-              leftR2: fields.url({ label: 'URL Video Sinistra' }),
-              rightType: mediaTypeField,
-              rightImage: fields.image({ label: 'Immagine Destra', directory: 'src/assets/projects/m13r', publicPath: '/src/assets/projects/m13r/' }),
-              rightR2: fields.url({ label: 'URL Video Destra' }),
+              
+              // SINISTRA
+              leftType: fields.select({
+                label: 'Tipo Media Sinistra',
+                options: [
+                  { label: 'Immagine Locale', value: 'image' },
+                  { label: 'Immagine da R2 (Link)', value: 'imageR2' },
+                  { label: 'Video da R2 (Link)', value: 'video' }
+                ],
+                defaultValue: 'image'
+              }),
+              leftImage: fields.image({ label: 'Immagine Sinistra (Se Locale)', directory: 'src/assets/projects/m13l', publicPath: '/src/assets/projects/m13l/' }),
+              leftR2: fields.text({ label: 'Link R2 Sinistra (Immagine o Video)' }),
+              
+              // DESTRA
+              rightType: fields.select({
+                label: 'Tipo Media Destra',
+                options: [
+                  { label: 'Immagine Locale', value: 'image' },
+                  { label: 'Immagine da R2 (Link)', value: 'imageR2' },
+                  { label: 'Video da R2 (Link)', value: 'video' }
+                ],
+                defaultValue: 'image'
+              }),
+              rightImage: fields.image({ label: 'Immagine Destra (Se Locale)', directory: 'src/assets/projects/m13r', publicPath: '/src/assets/projects/m13r/' }),
+              rightR2: fields.text({ label: 'Link R2 Destra (Immagine o Video)' }),
             }),
           },
 

@@ -4,10 +4,11 @@ import react from '@astrojs/react';
 import markdoc from '@astrojs/markdoc';
 import keystatic from '@keystatic/astro';
 
-// L'import di cloudflare è stato rimosso
+// Rileviamo se siamo su Cloudflare (produzione) o sul tuo Mac (sviluppo)
+const isProd = process.env.NODE_ENV === 'production';
 
 export default defineConfig({
-  // Il sito sarà puramente statico (niente crash per colpa dei worker)
+  // Il sito sarà puramente statico
   output: 'static',
 
   vite: {
@@ -17,12 +18,12 @@ export default defineConfig({
   integrations: [
     react(),
     markdoc(),
-    // Forziamo Keystatic a funzionare come Single Page App statica per il pannello Admin
-    keystatic({
+    
+    // Il trucco da maestri: iniettiamo il pannello Keystatic SOLO in locale. 
+    // In produzione viene ignorato, così Astro non richiede nessun server/adapter 
+    // e la build non andrà mai più in crash.
+    ...(isProd ? [] : [keystatic({
       configPath: './keystatic.config',
-    })
+    })])
   ]
-  
-  // L'adapter di Cloudflare è stato rimosso completamente.
-  // Astro genererà puro HTML/CSS/JS nella cartella /dist
 });

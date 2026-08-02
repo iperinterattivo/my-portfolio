@@ -84,10 +84,11 @@ export default config({
         title: fields.slug({ name: { label: 'Titolo Progetto' } }),
         tagline: fields.text({ label: 'Sottotitolo / Tagline ad impatto' }),
         category: fields.text({ label: 'Categoria / Studio', defaultValue: 'URBANFRAME STUDIO' }),
-        coverImage: fields.image({
-          label: 'Immagine di Copertina (Thumbnail Griglia Works)',
-          directory: 'src/assets/projects/covers',
-          publicPath: '/src/assets/projects/covers/',
+        
+        // MODIFICA APPLICATA: Convertito in URL R2 di testo libero
+        coverImage: fields.text({
+          label: 'Immagine di Copertina (Link Cloudflare R2)',
+          description: 'Incolla qui il link pubblico di R2 per la miniatura (es: https://pub-tuo-codice.r2.dev/cover.jpg)',
         }),
 
         mediaFlow: fields.blocks({
@@ -98,46 +99,49 @@ export default config({
               sectionCaption: sectionCaptionField,
               aspectRatio: aspectRatioField('21-9'),
               type: mediaTypeField,
-              image: fields.image({ label: 'Immagine', directory: 'src/assets/projects/m01', publicPath: '/src/assets/projects/m01/' }),
-              r2Url: fields.url({ label: 'URL Video / Link YouTube' }),
+              image: fields.image({ label: 'Immagine Locale (Opzionale)', directory: 'src/assets/projects/m01', publicPath: '/src/assets/projects/m01/' }),
+              
+              // MODIFICA APPLICATA: Campo testo libero per R2, ultra sicuro per le build
+              r2Url: fields.text({ 
+                label: 'Link Cloudflare R2 (Video o Immagine Full-Bleed)',
+                description: 'Incolla il link diretto di R2 o YouTube. Salta la build locale ed è molto più veloce.'
+              }),
               caption: fields.text({ label: 'Didascalia inferiore (opzionale)' }),
             }),
           },
 
           gridTop8x2: {
-  label: '⊞ ⊞ ⊞ ⊞ ⊞ ⊞ ⊞ ⊞  [02] Top Preview Grid',
-  schema: fields.object({
-    sectionCaption: sectionCaptionField,
-    mobileStack: mobileStackField,
-    folderName: fields.text({ label: '⚡ CARTELLA AUTOMATICA LOCALE: Nome cartella in src/assets/projects/.' }),
-    
-    // 👇 NUOVO CAMPO: Supporta link Cloudflare R2 / HLS / YouTube
-    items: fields.array(
-      fields.object({
-        r2Url: fields.text({ label: 'Link Esterno / Cloudflare (MP4, M3U8, YouTube)' }),
-        image: fields.image({ 
-          label: 'Oppure File Locale', 
-          directory: 'src/assets/projects/m02', 
-          publicPath: '/src/assets/projects/m02/' 
-        }),
-      }),
-      { 
-        label: '🔗 MEDIA CLOUDFLARE E MISTI', 
-        itemLabel: props => props.value.r2Url ? `☁️ ${props.value.r2Url}` : '🎞️ Media Locale' 
-      }
-    ),
+            label: '⊞ ⊞ ⊞ ⊞ ⊞ ⊞ ⊞ ⊞  [02] Top Preview Grid',
+            schema: fields.object({
+              sectionCaption: sectionCaptionField,
+              mobileStack: mobileStackField,
+              folderName: fields.text({ label: '⚡ CARTELLA AUTOMATICA LOCALE: Nome cartella in src/assets/projects/.' }),
+              
+              items: fields.array(
+                fields.object({
+                  r2Url: fields.text({ label: 'Link Esterno / Cloudflare (MP4, M3U8, YouTube)' }),
+                  image: fields.image({ 
+                    label: 'Oppure File Locale', 
+                    directory: 'src/assets/projects/m02', 
+                    publicPath: '/src/assets/projects/m02/' 
+                  }),
+                }),
+                { 
+                  label: '🔗 MEDIA CLOUDFLARE E MISTI', 
+                  itemLabel: props => props.value.r2Url ? `☁️ ${props.value.r2Url}` : '🎞️ Media Locale' 
+                }
+              ),
 
-    // Campo legacy mantenuto per non rompere i vecchi progetti
-    images: fields.array(
-      fields.image({ 
-        label: 'Frame Griglia', 
-        directory: 'src/assets/projects/m02', 
-        publicPath: '/src/assets/projects/m02/' 
-      }),
-      { label: 'METODO MANUALE (Solo Immagini Locali)', itemLabel: props => '🎞️ Frame Griglia Caricato' }
-    ),
-  }),
-},
+              images: fields.array(
+                fields.image({ 
+                  label: 'Frame Griglia', 
+                  directory: 'src/assets/projects/m02', 
+                  publicPath: '/src/assets/projects/m02/' 
+                }),
+                { label: 'METODO MANUALE (Solo Immagini Locali)', itemLabel: props => '🎞️ Frame Griglia Caricato' }
+              ),
+            }),
+          },
 
           split5050: {
             label: '▌▌│▐▐  [03] Split Screen 50 / 50',
@@ -208,7 +212,6 @@ export default config({
             schema: fields.object({
               sectionCaption: sectionCaptionField,
               
-              // LA LOGICA CONDIZIONALE: La tendina appare solo se la spunta è attiva
               mobileLayout: fields.conditional(
                 fields.checkbox({
                   label: '📱 Dividi su Mobile (Multicolonna)',
@@ -226,7 +229,7 @@ export default config({
                     ],
                     defaultValue: '2',
                   }),
-                  false: fields.empty(), // Se non c'è la spunta, nasconde il selettore
+                  false: fields.empty(), 
                 }
               ),
 

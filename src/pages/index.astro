@@ -7,7 +7,6 @@ import Footer from '../components/core/Footer.astro';
  
 import { createReader } from '@keystatic/core/reader';
 import keystaticConfig from '../../keystatic.config';
-import { Image } from 'astro:assets';
 
 const reader = createReader('', keystaticConfig);
 const rawProjects = await reader.collections.projects.all();
@@ -85,11 +84,10 @@ const currentGridClass = gridStyles[gridColumns as keyof typeof gridStyles] || g
             <a href={`/works/${project.slug}`} class="group block select-none">
               <div class="relative aspect-video bg-zinc-900 overflow-hidden mb-3.5 border border-zinc-800/80 group-hover:border-zinc-400 transition-colors duration-300">
                 {project.entry.coverImage ? (
-                  <Image 
+                  <img 
                     src={project.entry.coverImage} 
                     alt={project.entry.title} 
-                    width={1280}
-                    height={720}
+                    loading="lazy"
                     class="w-full h-full object-cover md:grayscale md:contrast-125 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
                   />
                 ) : (

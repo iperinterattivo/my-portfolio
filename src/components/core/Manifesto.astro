@@ -2,14 +2,21 @@
 // Componente Manifesto / About Me
 ---
 
-<section id="about" class="about-container py-16 md:py-24 border-b border-zinc-900 my-24 overflow-hidden">
+<!-- 
+  SPAZIATURA SEZIONE:
+  - mt-6 mb-16 md:my-24: Ridotto il margine superiore su mobile a 24px (mt-6) invece di 96px.
+  - pt-4 pb-12 md:py-24: Padding superiore iniziale minimo per mobile.
+-->
+<section id="about" class="about-container pt-4 pb-12 md:py-24 mt-6 mb-16 md:my-24 border-b border-zinc-900 overflow-hidden">
+  
   <!-- Intestazione Monumentale -->
-  <header class="pb-16 mb-20">
-    <div class="font-mono text-xs uppercase tracking-widest text-zinc-500 mb-8">
-     <!-- [ 02 // ABOUT ENRICO SCIGLIUTO ]-->
+  <!-- pb-6 mb-8 md:pb-16 md:mb-20: Distanza tra titolo "ABOUT ME" e testo ridotta drasticamente su mobile -->
+  <header class="pb-6 mb-8 md:pb-16 md:mb-20">
+    <div class="font-mono text-xs uppercase tracking-widest text-zinc-500 mb-4 md:mb-8">
+      <!-- [ 02 // ABOUT ENRICO SCIGLIUTO ]-->
     </div>
     
-    <h2 class="font-display font-black text-6xl sm:text-8xl md:text-9xl lg:text-[10rem] tracking-tighter uppercase text-white leading-[0.8] flex flex-wrap items-center gap-x-6 sm:gap-x-10">
+    <h2 class="font-display font-black text-6xl sm:text-8xl md:text-9xl lg:text-[10rem] tracking-tighter uppercase text-white leading-[0.85] md:leading-[0.08] flex flex-wrap items-center gap-x-4 sm:gap-x-10">
       <!-- "ABOUT" entra da SINISTRA -->
       <span class="about-slide-left inline-block">ABOUT</span> 
       <!-- "ME" entra da DESTRA -->
@@ -18,46 +25,53 @@
   </header>
 
   <!-- Griglia Editoriale Asimmetrica -->
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
     
-    <!-- Colonna Sinistra: Filosofia / Bio -->
-    <div class="lg:col-span-6 space-y-8 text-xl sm:text-2xl md:text-3xl font-light text-zinc-300 leading-tighter">
-      <p class="split-reveal">
-        Sono un creative technologist con un background in Visual & Innovation Design. 
-        Metto in simbiosi estetica e tecnologia, esplorandone le molteplici possibilità.
+    <!-- Colonna Sinistra: Filosofia / Bio (8 colonne su 12) -->
+    <div class="lg:col-span-8 space-y-6 md:space-y-12">
+      
+      <!-- Paragrafo 1: Hero Statement -->
+      <p class="split-reveal text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-white leading-[1.15] md:leading-[1.1] tracking-tight break-keep [hyphens:none] [overflow-wrap:normal]">
+        Sono un creative technologist con&nbsp;un background in Visual &amp;&nbsp;Innovation Design. 
+        Metto in&nbsp;simbiosi estetica e&nbsp;tecnologia, esplorandone le&nbsp;molteplici possibilità.
       </p>
 
-      <p class="split-reveal text-lg sm:text-xl text-zinc-400">
-        Quando progetto, rifletto profondamente sulla relazione reciproca che c’è tra persone,
-        contesto e tecnologia, elementi imprescindibili per sviluppare un’esperienza, immedesimandomi 
-        il più possibile prima del live. 
-      </p>
+      <!-- Paragrafi 2 e 3: Body Copy -->
+      <div class="space-y-6 max-w-none lg:max-w-5xl">
+        <p class="split-reveal text-base sm:text-xl md:text-2xl lg:text-3xl text-zinc-400 font-normal leading-relaxed md:leading-snug break-keep [hyphens:none] [overflow-wrap:normal]">
+          Quando progetto, rifletto profondamente sulla relazione reciproca che c’è tra persone,
+          contesto e&nbsp;tecnologia, elementi imprescindibili per sviluppare un’esperienza, immedesimandomi 
+          il più possibile prima del&nbsp;live.
+        </p>
 
-      <p class="split-reveal text-lg sm:text-xl text-zinc-400">
-        La tecnologia è un mezzo che facilita le nostre visioni e può amplificarle, ma da sola non basta per rendere efficace e memorabile un’esperienza portando valore e senso in quello che le persone vivono.
-      </p>
+        <p class="split-reveal text-base sm:text-xl md:text-2xl lg:text-3xl text-zinc-400 font-normal leading-relaxed md:leading-snug break-keep [hyphens:none] [overflow-wrap:normal]">
+          La tecnologia è&nbsp;un mezzo che facilita le nostre visioni e&nbsp;può amplificarle, ma da sola non basta per rendere efficace e&nbsp;memorabile un’esperienza portando valore e&nbsp;senso in quello che le persone vivono.
+        </p>
+      </div>
+
     </div>
 
     <!-- Colonna Destra: Stack e Core Competencies -->
-    <div class="lg:col-span-5 border-t lg:border-t-0 lg:border-l border-zinc-900 pt-8 lg:pt-0 lg:pl-12 font-mono text-xs text-zinc-400 space-y-12">
+    <div class="lg:col-span-4 border-t lg:border-t-0 lg:border-l border-zinc-900 pt-8 lg:pt-0 lg:pl-8 font-mono text-xs text-zinc-400 space-y-8 md:space-y-12 shrink-0">
       <div class="split-reveal">
-        <span class="text-zinc-600 block mb-4">// CORE DISCIPLINE</span>
-        <ul class="space-y-2.5 text-sm uppercase text-zinc-200">
+        <span class="text-zinc-600 block mb-4 whitespace-nowrap">// CORE DISCIPLINE</span>
+        <ul class="space-y-2.5 text-sm uppercase text-zinc-200 whitespace-nowrap">
           <li>[+] Interaction Design</li>
-          <li>[+] Visual & Motion Design</li>
+          <li>[+] Visual &amp; Motion Design</li>
           <li>[+] Art Direction</li>
           <li>[+] User Experience</li>
-          <li>[+] Touchdesigner & GLSL Shaders</li>
+          <li>[+] Touchdesigner &amp; GLSL Shaders</li>
         </ul>
       </div>
 
       <div class="split-reveal">
         <span class="text-zinc-600 block mb-4">// TECHNICAL STACK</span>
         <p class="text-zinc-500 leading-relaxed">
-          Touchdesigner, Arduino & Hardware, Python, Glsl Shaders
+          Touchdesigner, Arduino &amp; Hardware, Python, Glsl Shaders
         </p>
       </div>
     </div>
+
   </div>
 </section>
 

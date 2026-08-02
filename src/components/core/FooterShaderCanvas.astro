@@ -1,0 +1,137 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = "" } = Astro.props;
+---
+
+<div id="footer-shader-container" class={`absolute inset-0 w-full h-full overflow-hidden z-0 pointer-events-none ${className}`}>
+  <canvas id="footer-shader-canvas" class="w-full h-full block"></canvas>
+</div>
+
+<script>
+  import * as THREE from 'three';
+  import { footerVertexShader, footerFragmentShader } from '../../shaders/footerShader';
+
+  function initFooterShader() {
+    const canvas = document.getElementById('footer-shader-canvas') as HTMLCanvasElement | null;
+    const container = document.getElementById('footer-shader-container');
+    
+    if (!canvas || !container) return;
+
+    if (canvas.hasAttribute('data-engine-active')) return;
+    canvas.setAttribute('data-engine-active', 'true');
+
+    const width = container.offsetWidth;
+    const height = container.offsetHeight;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+    camera.position.set(0, -0.125, 2.3);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ 
+      canvas: canvas, 
+      alpha: true, 
+      antialias: true,
+      powerPreference: "high-performance"
+    });
+    
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // INIEZIONE UNIFORME MOUSE (Default al centro 0.5, 0.5)
+    const uniforms = {
+      u_time: { value: 0.0 },
+      u_resolution: { value: new THREE.Vector2(width, height) },
+      u_mouse: { value: new THREE.Vector2(0.5, 0.5) }
+    };
+
+    const geometry = new THREE.PlaneGeometry(4.8, 4.8, 128, 128);
+    
+    const material = new THREE.ShaderMaterial({
+      vertexShader: footerVertexShader,
+      fragmentShader: footerFragmentShader,
+      uniforms,
+      wireframe: false,
+      side: THREE.DoubleSide
+    });
+    
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.rotation.x = -Math.PI * 0.18;
+    scene.add(mesh);
+
+    // SISTEMA DI TRACKING MOUSE E TOUCH
+    function updateMousePosition(clientX: number, clientY: number) {
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      
+      // Normalizzazione coordinate da 0.0 a 1.0 relative al contenitore
+      const x = (clientX - rect.left) / rect.width;
+      // Inversione asse Y (WebGL ha lo zero in basso, il DOM in alto)
+      const y = 1.0 - ((clientY - rect.top) / rect.height); 
+      
+      // Clamp per evitare comportamenti anomali se il mouse esce dal footer
+      uniforms.u_mouse.value.set(
+        Math.max(0, Math.min(1, x)),
+        Math.max(0, Math.min(1, y))
+      );
+    }
+
+    function onMouseMove(e: MouseEvent) {
+      updateMousePosition(e.clientX, e.clientY);
+    }
+
+    function onTouchMove(e: TouchEvent) {
+      if (e.touches.length > 0) {
+        updateMousePosition(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }
+
+    // Usiamo window anziché container per catturare il movimento 
+    // anche se l'utente passa sopra i testi in z-10
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+    window.addEventListener('touchstart', onTouchMove, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+
+    // RESIZE & ANIMATION LOOP
+    let animationFrameId: number;
+    const clock = new THREE.Clock();
+
+    function onResize() {
+      if (!container || !renderer) return;
+      const w = container.offsetWidth;
+      const h = container.offsetHeight;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      uniforms.u_resolution.value.set(w, h);
+    }
+
+    window.addEventListener('resize', onResize, { passive: true });
+
+    function animate() {
+      animationFrameId = requestAnimationFrame(animate);
+      uniforms.u_time.value = clock.getElapsedTime();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // CLEANUP rigoroso per smontare i nuovi listener
+    document.addEventListener('astro:before-swap', () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('touchstart', onTouchMove);
+      window.removeEventListener('touchmove', onTouchMove);
+      geometry.dispose();
+      material.dispose();
+      renderer.dispose();
+    }, { once: true });
+  }
+
+  document.addEventListener('DOMContentLoaded', initFooterShader);
+  document.addEventListener('astro:page-load', initFooterShader);
+</script>

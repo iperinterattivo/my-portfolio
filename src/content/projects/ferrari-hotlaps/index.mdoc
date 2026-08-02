@@ -1,0 +1,35 @@
+---
+title: Ferrari Hotlaps
+tagline: Data Visualization Artwork
+category: 'Data visualization '
+coverImage: /src/assets/projects/covers/ferrari-hotlaps/coverImage.png
+mediaFlow:
+  - discriminant: heroCinematic
+    value:
+      aspectRatio: 21-9
+      type: image
+      image: /src/assets/projects/m01/ferrari-hotlaps/mediaFlow/0/value/image.png
+  - discriminant: doubleIsolated
+    value:
+      mobileStack: true
+      leftType: video
+      leftR2: https://pub-b1fe7e7793f846058f64ed95e6bca525.r2.dev/Ferrari/index.m3u8
+      rightType: image
+      rightImage: >-
+        /src/assets/projects/m13r/ferrari-hotlaps/mediaFlow/1/value/rightImage.png
+  - discriminant: heroCinematic
+    value:
+      aspectRatio: 16-9
+      type: image
+      image: /src/assets/projects/m01/ferrari-hotlaps/mediaFlow/2/value/image.png
+  - discriminant: heroCinematic
+    value:
+      aspectRatio: 16-9
+      type: image
+      image: /src/assets/projects/m01/ferrari-hotlaps/mediaFlow/3/value/image.jpg
+---
+Ho lavorato assieme al team Interaction di Mirror Digital Agency allo sviluppo del sistema di artwork generativo custom per l'evento Ferrari Hot Laps tenutosi al circuito di Fiorano.\
+\
+A seguito di una serie di giornate di workshop i clienti Ferrari hanno avuto la possibilità di fare 3 giri di pista su una Ferrari (inserire modello). Il sistema di raccolta dati era composto da un bracciale wereable Whoop per i battiti cardiaci, unito ai dati di velocità e accelerazione ricavati con il gps dello smartphone.\
+\
+Tutti questi dati sono stati elaborati e passati a Touchdesigner che tramite un sistema di generazione fatto ad hoc li riceveva, generava il video con la data visualization custom assegnandolo ad un ID e li caricava su un bucket S3 da cui venivano scaricati e caricati nell'app di ogni cliente Ferrari.

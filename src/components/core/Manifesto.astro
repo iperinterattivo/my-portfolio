@@ -1,0 +1,158 @@
+---
+// Componente Manifesto / About Me
+---
+
+<section id="about" class="about-container py-16 md:py-24 border-b border-zinc-900 my-24 overflow-hidden">
+  <!-- Intestazione Monumentale -->
+  <header class="pb-16 mb-20">
+    <div class="font-mono text-xs uppercase tracking-widest text-zinc-500 mb-8">
+     <!-- [ 02 // ABOUT ENRICO SCIGLIUTO ]-->
+    </div>
+    
+    <h2 class="font-display font-black text-6xl sm:text-8xl md:text-9xl lg:text-[10rem] tracking-tighter uppercase text-white leading-[0.8] flex flex-wrap items-center gap-x-6 sm:gap-x-10">
+      <!-- "ABOUT" entra da SINISTRA -->
+      <span class="about-slide-left inline-block">ABOUT</span> 
+      <!-- "ME" entra da DESTRA -->
+      <span class="me-slide-right inline-block text-zinc-600">ME</span>
+    </h2>
+  </header>
+
+  <!-- Griglia Editoriale Asimmetrica -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
+    
+    <!-- Colonna Sinistra: Filosofia / Bio -->
+    <div class="lg:col-span-6 space-y-8 text-xl sm:text-2xl md:text-3xl font-light text-zinc-300 leading-tighter">
+      <p class="split-reveal">
+        Sono un creative technologist con un background in Visual & Innovation Design. 
+        Metto in simbiosi estetica e tecnologia, esplorandone le molteplici possibilità.
+      </p>
+
+      <p class="split-reveal text-lg sm:text-xl text-zinc-400">
+        Quando progetto, rifletto profondamente sulla relazione reciproca che c’è tra persone,
+        contesto e tecnologia, elementi imprescindibili per sviluppare un’esperienza, immedesimandomi 
+        il più possibile prima del live. 
+      </p>
+
+      <p class="split-reveal text-lg sm:text-xl text-zinc-400">
+        La tecnologia è un mezzo che facilita le nostre visioni e può amplificarle, ma da sola non basta per rendere efficace e memorabile un’esperienza portando valore e senso in quello che le persone vivono.
+      </p>
+    </div>
+
+    <!-- Colonna Destra: Stack e Core Competencies -->
+    <div class="lg:col-span-5 border-t lg:border-t-0 lg:border-l border-zinc-900 pt-8 lg:pt-0 lg:pl-12 font-mono text-xs text-zinc-400 space-y-12">
+      <div class="split-reveal">
+        <span class="text-zinc-600 block mb-4">// CORE DISCIPLINE</span>
+        <ul class="space-y-2.5 text-sm uppercase text-zinc-200">
+          <li>[+] Interaction Design</li>
+          <li>[+] Visual & Motion Design</li>
+          <li>[+] Art Direction</li>
+          <li>[+] User Experience</li>
+          <li>[+] Touchdesigner & GLSL Shaders</li>
+        </ul>
+      </div>
+
+      <div class="split-reveal">
+        <span class="text-zinc-600 block mb-4">// TECHNICAL STACK</span>
+        <p class="text-zinc-500 leading-relaxed">
+          Touchdesigner, Arduino & Hardware, Python, Glsl Shaders
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Maschera di ritaglio per le righe create dallo SplitText */
+  :global(.split-line) {
+    overflow: hidden !important;
+    display: block;
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { SplitText } from 'gsap/SplitText';
+
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+
+  function setupAnimations() {
+    const aboutTitle = document.querySelector(".about-slide-left");
+    const meTitle = document.querySelector(".me-slide-right");
+
+    // 1. "ABOUT" entra da Sinistra
+    if (aboutTitle) {
+      gsap.fromTo(aboutTitle, 
+        { x: -100, opacity: 0 },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.5,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".about-container",
+            start: "top 85%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+    }
+
+    // 2. "ME" entra da Destra
+    if (meTitle) {
+      gsap.fromTo(meTitle, 
+        { x: 800, opacity: 0 },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.75,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".about-container",
+            start: "top 85%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+    }
+
+    // 3. Tutti i paragrafi entrano in parallelo con lo SplitText
+    const splitTargets = document.querySelectorAll(".split-reveal");
+
+    splitTargets.forEach((target) => {
+      if (target.anim) {
+        target.anim.progress(1).kill();
+        target.split.revert();
+      }
+
+      target.split = new SplitText(target, {
+        type: "lines,chars",
+        linesClass: "split-line"
+      });
+
+      target.anim = gsap.fromTo(target.split.chars, 
+        { y: 40, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.35,
+          ease: "power2.out",
+          stagger: 0.006,
+          scrollTrigger: {
+            trigger: target,
+            start: "top 90%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+    });
+
+    ScrollTrigger.refresh();
+  }
+
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    setupAnimations();
+  } else {
+    document.addEventListener("DOMContentLoaded", setupAnimations);
+  }
+</script>

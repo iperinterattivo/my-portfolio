@@ -1,17 +1,125 @@
 ---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/core/Hero.astro';
+import Marquee from '../components/core/Marquee.astro';
+import Manifesto from '../components/core/Manifesto.astro';
+import Footer from '../components/core/Footer.astro';
+ 
+import { createReader } from '@keystatic/core/reader';
+import keystaticConfig from '../../keystatic.config';
+import { Image } from 'astro:assets';
 
+const reader = createReader('', keystaticConfig);
+const rawProjects = await reader.collections.projects.all();
+
+// Lettura delle impostazioni globali dal CMS
+let gridColumns = '5';
+let orderedSlugs: string[] = [];
+
+try {
+  const settings = await reader.singletons.siteSettings.read();
+  if (settings?.gridColumns) {
+    gridColumns = settings.gridColumns;
+  }
+  if (settings?.orderedProjects) {
+    orderedSlugs = settings.orderedProjects as string[];
+  }
+} catch (error) {
+  // Fallback se il singleton non è configurato
+}
+
+// MOTORE DI ORDINAMENTO DRAG & DROP
+let displayProjects = [...rawProjects];
+
+if (orderedSlugs.length > 0) {
+  // 1. Progetti scelti e ordinati a mano
+  const ordered = orderedSlugs
+    .map(slug => rawProjects.find(p => p.slug === slug))
+    .filter(Boolean) as typeof rawProjects;
+  
+  // 2. Progetti non inclusi nella lista
+  const remaining = rawProjects.filter(p => !orderedSlugs.includes(p.slug));
+  
+  // 3. Unione finale
+  displayProjects = [...ordered, ...remaining];
+}
+
+const gridStyles = {
+  '2': 'grid-cols-1 sm:grid-cols-2 gap-y-16 gap-x-8 md:gap-x-12',
+  '3': 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-12 gap-x-8',
+  '4': 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-12 gap-x-6',
+  '5': 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-y-12 gap-x-6'
+};
+
+const currentGridClass = gridStyles[gridColumns as keyof typeof gridStyles] || gridStyles['5'];
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Enrico Scigliuto | Portfolio">
+  <Hero />
+  <!--  <Marquee /> -->
+  <Manifesto />
+
+  <section id="work" class="py-16 sm:py-14">
+    <header class="border-b border-zinc-900 pb-0 mb-16">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+        <span class="font-mono text-xs uppercase tracking-widest text-zinc-500">
+<!--          ARCHIVE // 001 [SELECTED WORKS] -->
+        </span>
+        <span class="font-mono text-xs uppercase tracking-widest text-zinc-500">
+<!--           TOTAL ENTRIES: ({displayProjects.length}) -->
+        </span>
+      </div>
+      <h1 class="font-display font-black text-6xl sm:text-8xl md:text-9xl lg:text-[10rem] tracking-tighter uppercase leading-[0.8] text-white">
+        WORKS
+      </h1>
+    </header>
+
+    {displayProjects.length === 0 ? (
+      <div class="p-24 border border-dashed border-zinc-800 text-center font-mono text-zinc-500 rounded-xl">
+        Nessun progetto nel database. Vai su <a href="/keystatic" class="underline text-white">/keystatic</a> per caricarne uno.
+      </div>
+    ) : (
+      <div class={`grid ${currentGridClass}`}>
+        {displayProjects.map((project, index) => {
+          return (
+            <a href={`/works/${project.slug}`} class="group block select-none">
+              <div class="relative aspect-video bg-zinc-900 overflow-hidden mb-3.5 border border-zinc-800/80 group-hover:border-zinc-400 transition-colors duration-300">
+                {project.entry.coverImage ? (
+                  <Image 
+                    src={project.entry.coverImage} 
+                    alt={project.entry.title} 
+                    width={1280}
+                    height={720}
+                    class="w-full h-full object-cover md:grayscale md:contrast-125 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
+                  />
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center font-mono text-[10px] text-zinc-600 uppercase tracking-widest">
+                    [ NO COVER ]
+                  </div>
+                )}
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <span class="font-mono text-xs text-white tracking-widest uppercase border border-white px-3 py-1 bg-black/60">
+                    OPEN →
+                  </span>
+                </div>
+              </div>
+
+              <div class="flex flex-col items-start font-mono text-xs">
+                <div class="pr-2 truncate w-full">
+                  <h3 class="font-bold text-zinc-200 group-hover:text-white truncate transition-colors">
+                    {project.entry.title}
+                  </h3>
+                  <span class="text-[10px] text-zinc-500 uppercase tracking-widest block mt-1 truncate">
+                  {project.entry.category || 'INDEPENDENT PRODUCTION'}
+                  </span>
+                </div>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    )}
+  </section>
+
+  <Footer />
+</Layout>

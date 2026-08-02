@@ -1,0 +1,158 @@
+---
+---
+<!-- 
+  MODAL LIGHTBOX FULLSCREEN
+  z-[100] e gestione programmatica dell'header di navigazione.
+-->
+<div 
+  id="lightbox-modal" 
+  class="fixed inset-0 z-[100] w-screen h-screen bg-black/98 backdrop-blur-xl hidden flex-col justify-between p-4 sm:p-8 md:p-10 select-none opacity-0 transition-opacity duration-300 overflow-hidden"
+>
+  <!-- Top Bar Modal Minimalista -->
+  <div class="flex justify-between items-center z-20 font-mono text-xs uppercase tracking-widest text-zinc-400">
+    <span id="lightbox-counter" class="bg-zinc-900/80 px-3 py-1.5 rounded border border-zinc-800/80">[ 01 / 16 ]</span>
+    <button id="lightbox-close" class="px-4 py-2 border border-zinc-800 bg-zinc-900/50 hover:border-white hover:text-white transition-colors cursor-pointer">
+      CHIUDI [X]
+    </button>
+  </div>
+
+  <!-- Area Immagine Centrale (Con Frecce Touch Laterali per Mobile) -->
+  <div class="relative flex-grow flex items-center justify-center my-4 overflow-hidden w-full">
+    
+    <!-- FRECCIA SINISTRA MOBILE -->
+    <button 
+      data-lightbox-prev
+      class="md:hidden absolute left-2 top-1/2 -translate-y-1/2 z-30 w-14 h-14 flex items-center justify-center text-3xl text-white/30 active:text-white active:scale-125 transition-all duration-150 cursor-pointer"
+      aria-label="Immagine precedente"
+    >
+      ←
+    </button>
+
+    <!-- Immagine Preview -->
+    <img id="lightbox-img" src="" alt="Gallery Preview" class="max-h-[82vh] max-w-[92vw] object-contain transition-transform duration-300 select-none" />
+
+    <!-- FRECCIA DESTRA MOBILE -->
+    <button 
+      data-lightbox-next
+      class="md:hidden absolute right-2 top-1/2 -translate-y-1/2 z-30 w-14 h-14 flex items-center justify-center text-3xl text-white/30 active:text-white active:scale-125 transition-all duration-150 cursor-pointer"
+      aria-label="Immagine successiva"
+    >
+      →
+    </button>
+  </div>
+
+  <!-- Controlli Navigazione Desktop (Frecce Centrate in Basso) -->
+  <div class="hidden md:flex justify-center items-center gap-1 z-20 font-mono text-xs uppercase tracking-widest pb-2">
+    <button 
+      data-lightbox-prev
+      class="w-14 h-12 border border-zinc-800 bg-zinc-950/80 text-zinc-400 hover:border-white hover:text-white hover:scale-105 active:scale-95 transition-all flex items-center justify-center text-lg cursor-pointer"
+      aria-label="Precedente"
+    >
+      ←
+    </button>
+    
+    <span class="text-[10px] text-zinc-600 uppercase tracking-widest px-2"></span>
+    
+    <button 
+      data-lightbox-next
+      class="w-14 h-12 border border-zinc-800 bg-zinc-950/80 text-zinc-400 hover:border-white hover:text-white hover:scale-105 active:scale-95 transition-all flex items-center justify-center text-lg cursor-pointer"
+      aria-label="Successivo"
+    >
+      →
+    </button>
+  </div>
+</div>
+
+<script>
+  function setupLightbox() {
+    const modal = document.getElementById('lightbox-modal');
+    const imgElement = document.getElementById('lightbox-img') as HTMLImageElement;
+    const counterElement = document.getElementById('lightbox-counter');
+    const btnClose = document.getElementById('lightbox-close');
+
+    // Intercettiamo l'header globale del sito per disabilitarlo durante il popup
+    const siteHeader = document.querySelector('header') as HTMLElement | null;
+
+    const prevButtons = document.querySelectorAll('[data-lightbox-prev]');
+    const nextButtons = document.querySelectorAll('[data-lightbox-next]');
+    const triggers = document.querySelectorAll('[data-lightbox-index]');
+    
+    let images: string[] = [];
+    let currentIndex = 0;
+
+    if (!modal || triggers.length === 0) return;
+
+    triggers.forEach((trigger, idx) => {
+      const src = (trigger as HTMLElement).dataset.src;
+      if (src && !images.includes(src)) {
+        images.push(src);
+      }
+
+      trigger.addEventListener('click', () => {
+        currentIndex = idx;
+        openModal();
+      });
+    });
+
+    function updateModal() {
+      if (!imgElement || !counterElement) return;
+      imgElement.src = images[currentIndex];
+      counterElement.innerText = `[ ${(currentIndex + 1).toString().padStart(2, '0')} / ${images.length.toString().padStart(2, '0')} ]`;
+    }
+
+    function openModal() {
+      modal?.classList.remove('hidden');
+      setTimeout(() => modal?.classList.remove('opacity-0'), 10);
+      updateModal();
+      document.body.style.overflow = 'hidden';
+      
+      // Nasconde la Top Bar del sito per evitare conflitti con mix-blend-difference
+      if (siteHeader) {
+        siteHeader.style.opacity = '0';
+        siteHeader.style.pointerEvents = 'none';
+      }
+    }
+
+    function closeModal() {
+      modal?.classList.add('opacity-0');
+      
+      // Ripristina immediatamente la Top Bar
+      if (siteHeader) {
+        siteHeader.style.opacity = '1';
+        siteHeader.style.pointerEvents = '';
+      }
+
+      setTimeout(() => {
+        modal?.classList.add('hidden');
+        document.body.style.overflow = '';
+      }, 300);
+    }
+
+    function nextImg() {
+      if (images.length === 0) return;
+      currentIndex = (currentIndex + 1) % images.length;
+      updateModal();
+    }
+
+    function prevImg() {
+      if (images.length === 0) return;
+      currentIndex = (currentIndex - 1 + images.length) % images.length;
+      updateModal();
+    }
+
+    btnClose?.addEventListener('click', closeModal);
+    
+    prevButtons.forEach((btn) => btn.addEventListener('click', prevImg));
+    nextButtons.forEach((btn) => btn.addEventListener('click', nextImg));
+
+    document.addEventListener('keydown', (e) => {
+      if (!modal?.classList.contains('hidden')) {
+        if (e.key === 'Escape') closeModal();
+        if (e.key === 'ArrowRight') nextImg();
+        if (e.key === 'ArrowLeft') prevImg();
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupLightbox);
+</script>

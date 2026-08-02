@@ -4,15 +4,23 @@ import react from '@astrojs/react';
 import markdoc from '@astrojs/markdoc';
 import keystatic from '@keystatic/astro';
 
+import cloudflare from '@astrojs/cloudflare';
+
 export default defineConfig({
-  // Architettura 100% Static Site Generation (SSG). 
-  // Nessun server locale, nessun emulatore, stabilità assoluta.
+  output: 'static',
+
   vite: {
     plugins: [tailwindcss()],
   },
+
   integrations: [
     react(),
     markdoc(),
-    keystatic()
+    // Forziamo Keystatic a funzionare come Single Page App statica per il pannello Admin
+    keystatic({
+      configPath: './keystatic.config', // o l'estensione che usi (.ts/.js)
+    })
   ],
+
+  adapter: cloudflare(),
 });

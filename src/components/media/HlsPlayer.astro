@@ -1,0 +1,66 @@
+---
+interface Props {
+  src: string;
+  poster?: string;
+  class?: string;
+}
+
+const { src, poster, class: className = '' } = Astro.props;
+---
+
+<!-- 
+  HLS PLAYER RIGOROSO:
+  Il contenitore ha 'relative w-full h-full overflow-hidden' per riempire esattamente il box del layout padre (es. 9:16 o 1:1).
+  Il tag video interno usa 'absolute inset-0 w-full h-full object-cover' per evitare sgranature o doppi riquadri.
+-->
+<div class={`relative w-full h-full overflow-hidden bg-zinc-950 ${className}`}>
+  <video
+    ref="videoElement"
+    poster={poster}
+    autoplay
+    loop
+    muted
+    playsinline
+    class="absolute inset-0 w-full h-full object-cover block select-none pointer-events-none"
+    data-src={src}
+  ></video>
+</div>
+
+<script>
+  import Hls from 'hls.js';
+
+  function initHlsPlayers() {
+    const videoContainers = document.querySelectorAll('video[data-src]');
+
+    videoContainers.forEach((videoElement) => {
+      const video = videoElement as HTMLVideoElement;
+      const src = video.dataset.src;
+
+      if (!src) return;
+
+      // Se il browser supporta HLS nativamente (es. Safari su macOS/iOS)
+      if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = src;
+        video.play().catch(() => {
+          // Autoplay bloccato dal browser se non muto (ma il nostro è muto di default)
+        });
+      } 
+      // Altrimenti usiamo la libreria HLS.js per Chrome, Edge, Firefox, Android
+      else if (Hls.isSupported()) {
+        const hls = new Hls({
+          capLevelToPlayerSize: true, // Ottimizza la qualità in base alla dimensione reale del box CSS
+          startLevel: -1,
+        });
+        hls.loadSource(src);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(() => {});
+        });
+      }
+    });
+  }
+
+  // Esegui all'avvio e dopo ogni navigazione di Astro
+  document.addEventListener('DOMContentLoaded', initHlsPlayers);
+  document.addEventListener('astro:page-load', initHlsPlayers);
+</script>

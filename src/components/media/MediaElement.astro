@@ -1,0 +1,73 @@
+---
+import HlsPlayer from './HlsPlayer.astro';
+
+interface Props {
+  media: any;
+}
+
+const { media } = Astro.props;
+---
+
+{media && media.isYouTube && media.youtubeId ? (
+  /* YOUTUBE FACADE: Schermata in pausa stile editoriale */
+  <div 
+    class="youtube-facade relative w-full h-full bg-zinc-950 flex items-center justify-center group cursor-pointer overflow-hidden" 
+    data-yt-id={media.youtubeId}
+  >
+    <!-- Copertina Originale YouTube (Opacizzata e desaturata) -->
+    <img 
+      src={`https://img.youtube.com/vi/${media.youtubeId}/maxresdefault.jpg`} 
+      alt="YouTube Cover" 
+      class="absolute inset-0 w-full h-full object-cover opacity-40 grayscale contrast-125 group-hover:opacity-20 group-hover:scale-105 transition-all duration-700" 
+      loading="lazy"
+    />
+    
+    <!-- Pulsante PLAY stile sito -->
+    <div class="relative z-10 border border-zinc-700 bg-zinc-950/80 text-zinc-300 px-6 py-3 font-mono text-xs uppercase tracking-widest group-hover:border-white group-hover:text-white group-hover:bg-zinc-900 transition-all duration-300 backdrop-blur-md flex items-center gap-3 select-none">
+      <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse group-hover:bg-red-500"></span>
+      PLAY VIDEO
+    </div>
+  </div>
+) : media?.isHls ? (
+  <HlsPlayer src={media.url} />
+) : media?.isLoopVideo ? (
+  <video src={media.url} autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover block pointer-events-none select-none" />
+) : media ? (
+  <img src={media.url} alt={media.caption || "Media"} loading="lazy" class="absolute inset-0 w-full h-full object-cover block" />
+) : null}
+
+<script>
+  // Logica di iniezione Iframe On-Click (Migliora enormemente le performance)
+  function initYouTubeFacades() {
+    const facades = document.querySelectorAll('.youtube-facade');
+    
+    facades.forEach(facade => {
+      // Prevenire doppi binding se Astro ricarica la pagina
+      if (facade.hasAttribute('data-initialized')) return;
+      facade.setAttribute('data-initialized', 'true');
+      
+      facade.addEventListener('click', function(this: HTMLElement) {
+        const ytId = this.getAttribute('data-yt-id');
+        if (!ytId) return;
+        
+        // Creiamo il Player YouTube standard con i controlli e audio attivi (controls=1)
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('src', `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1`);
+        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+        iframe.setAttribute('allowfullscreen', 'true');
+        
+        // Inseriamo il video senza forzare lo scaling/cropping: manterrà il formato 16:9 aggiungendo le bande se necessario
+        iframe.className = 'absolute inset-0 w-full h-full z-20 bg-black';
+        
+        // Svuota la facciata e inietta il video
+        this.innerHTML = '';
+        this.appendChild(iframe);
+        this.classList.remove('cursor-pointer', 'group');
+      });
+    });
+  }
+
+  // Esegui allo startup e durante le navigazioni ViewTransitions di Astro
+  document.addEventListener('DOMContentLoaded', initYouTubeFacades);
+  document.addEventListener('astro:page-load', initYouTubeFacades);
+</script>

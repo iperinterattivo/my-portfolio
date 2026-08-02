@@ -1,0 +1,61 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Footer from '../components/core/Footer.astro';
+---
+
+<Layout title="About Me | Enrico Scigliuto — Creative Technologist">
+  <div class="pt-36 pb-20">
+    
+    <!-- Intestazione Monumentale -->
+    <header class="border-b border-zinc-900 pb-16 mb-20">
+      <div class="font-mono text-xs uppercase tracking-widest text-zinc-500 mb-8">
+       <!-- [ 02 // ABOUT ENRICO SCIGLIUTO ]-->
+      </div>
+      <h1 class="font-display font-black text-6xl sm:text-8xl md:text-9xl tracking-tighter uppercase text-white leading-[0.85]">
+        SONO UN <br /><span class="text-zinc-600">CREATIVE TECHNOLOGIST.</span>
+      </h1>
+    </header>
+
+    <!-- Griglia Editoriale Asimmetrica -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start mb-32">
+      
+      <!-- Colonna Sinistra: Filosofia / Bio -->
+      <div class="lg:col-span-7 space-y-8 text-xl sm:text-2xl md:text-3xl font-light text-zinc-300 leading-relaxed">
+        <p>
+          Ho un background in visual & innovation design e tanta curiosità e voglia di imparare, progetto <strong class="text-white font-normal underline decoration-zinc-700 underline-offset-8">metto in simbiosi estetica e tecnologia</strong> esplorandone le molteplici possibilità.
+        </p>
+        <p class="text-lg sm:text-xl text-zinc-400">
+        Quando progetto rifletto profondamente sulla relazione reciproca che c’è tra persone, contesto e tecnologia, elementi imprescindibili per sviluppare un’esperienza immedesimandosi il più possibile prima del live.
+        <br />
+        <br />
+        La tecnologia è solo un mezzo che facilita le nostre visioni e può amplificarle, ma da sola non basta per rendere efficace e memorabile un’esperienza portando valore e senso in quello che le persone vivono.
+        </p>
+      </div>
+
+      <!-- Colonna Destra: Stack e Core Competencies -->
+      <div class="lg:col-span-5 border-t lg:border-t-0 lg:border-l border-zinc-900 pt-8 lg:pt-0 lg:pl-12 font-mono text-xs text-zinc-400 space-y-12">
+        <div>
+          <span class="text-zinc-600 block mb-4">// CORE DISCIPLINE</span>
+          <ul class="space-y-2.5 text-sm uppercase text-zinc-200">
+            <li>[+] Interaction Design</li>
+            <li>[+] Touchdesigner & GLSL Shaders</li>
+            <li>[+] Visual & Motion Design</li>
+            <li>[+] Art Direction</li>
+            <li>[+] User Experience</li>
+          </ul>
+        </div>
+
+        <div>
+          <span class="text-zinc-600 block mb-4">// TECHNICAL STACK</span>
+          <p class="text-zinc-500 leading-relaxed">
+            Touchdesigner, Arduino, Python, Glsl Shaders
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <Footer />
+</Layout>

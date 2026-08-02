@@ -1,0 +1,169 @@
+---
+---
+<style>
+  /* Distruzione CSS immediata per la navigazione interna */
+  :global(html.loader-completed) #loader-canvas {
+    display: none !important;
+  }
+</style>
+
+<canvas id="loader-canvas" class="fixed inset-0 z-[9999] pointer-events-none"></canvas>
+
+<script is:inline>
+  // Blocca lo scroll solo ed esclusivamente al primissimo caricamento
+  if (typeof sessionStorage !== 'undefined') {
+    if (sessionStorage.getItem('loaderPlayed') === 'true') {
+      document.documentElement.classList.add('loader-completed');
+    } else {
+      if (document.body) document.body.style.overflow = 'hidden';
+    }
+  }
+</script>
+
+<script>
+  import { gsap } from 'gsap';
+  import * as THREE from 'three';
+  import { loaderVertexShader, loaderFragmentShader } from '../../shaders/loaderShader';
+
+  function initLoader() {
+    const canvas = document.getElementById('loader-canvas') as HTMLCanvasElement;
+    
+    // ==============================================================
+    // 1. NAVIGAZIONE INTERNA (Loader già visto)
+    // ==============================================================
+    if (sessionStorage.getItem('loaderPlayed') === 'true') {
+      if (canvas) canvas.remove();
+      document.body.style.overflow = '';
+      
+      // La tua UI DEVE animarsi comunque in ogni pagina (Navbar ecc.)
+      const uiElements = document.querySelectorAll('.reveal-ui:not(.hero-title)');
+      const heroTitle = document.querySelector('.hero-title');
+      
+      if (uiElements.length > 0 || heroTitle) {
+        const tl = gsap.timeline();
+        
+        if (uiElements.length > 0) {
+          tl.to(uiElements, {
+            y: 0, opacity: 1, duration: 1.2, stagger: 0.08, ease: 'power3.out', force3D: true, clearProps: 'filter,willChange'
+          }, 0); // Lo zero fa partire l'animazione immediatamente
+        }
+        
+        if (heroTitle) {
+          tl.fromTo(heroTitle, 
+            { y: 60, scale: 0.94, opacity: 0, filter: 'blur(12px)', willChange: 'transform, opacity, filter' },
+            { y: 0, scale: 1, opacity: 1, filter: 'blur(0px)', duration: 1.6, ease: 'power2.out', force3D: true, clearProps: 'filter,willChange' }, 
+            0
+          );
+        }
+      }
+      return; // Blocca l'esecuzione: il 3D non parte.
+    }
+
+    // ==============================================================
+    // 2. PRIMO ACCESSO ASSOLUTO (WebGL + Coreografia)
+    // ==============================================================
+    if (!canvas) return;
+    
+    // Blocco di sicurezza
+    document.body.style.overflow = 'hidden';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 5, -1, 0, 1);
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
+    
+    let material: THREE.ShaderMaterial;
+
+    function resize() {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      if (material) {
+        material.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
+      }
+    }
+
+    const textureLoader = new THREE.TextureLoader();
+    const maskTexture = textureLoader.load('/loader-mask.png', (tex) => {
+        tex.minFilter = THREE.LinearFilter;
+        tex.magFilter = THREE.LinearFilter;
+    });
+    const maskBlurTexture = textureLoader.load('/loader-mask-blur.png', (tex) => {
+        tex.minFilter = THREE.LinearFilter;
+        tex.magFilter = THREE.LinearFilter;
+    });
+
+    material = new THREE.ShaderMaterial({
+      vertexShader: loaderVertexShader,
+      fragmentShader: loaderFragmentShader,
+      uniforms: {
+        u_fill: { value: 0.0 },     
+        u_explode: { value: 0.0 },  
+        u_mask: { value: maskTexture },
+        u_mask_blur: { value: maskBlurTexture },
+        u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+      },
+      transparent: true
+    });
+
+    scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
+    window.addEventListener('resize', resize);
+    resize();
+
+    let reqId: number;
+    function render() {
+      renderer.render(scene, camera);
+      reqId = requestAnimationFrame(render);
+    }
+    render();
+
+    // LA TUA TIMELINE GSAP ORIGINALE INTATTA
+    const tl = gsap.timeline({
+      onComplete: () => {
+        cancelAnimationFrame(reqId);
+        renderer.dispose();
+        canvas.remove();
+        
+        // Segniamo il loader come VISTO nel browser dell'utente
+        sessionStorage.setItem('loaderPlayed', 'true');
+        document.documentElement.classList.add('loader-completed');
+        document.body.style.overflow = ''; 
+      }
+    });
+
+    tl.to(material.uniforms.u_fill, {
+      value: 1.1, duration: 1.4, ease: 'sine.out', delay: 0.0
+    })
+    .to(material.uniforms.u_explode, {
+      value: 1.50, duration: 4.2, ease: 'sine.out',
+    }, "-=.86")
+    .to('.reveal-ui:not(.hero-title)', {
+      y: 0, opacity: 1, duration: 1.2, stagger: 0.08, ease: 'power3.out', force3D: true, clearProps: 'filter,willChange'
+    }, "-=2.80")
+    .fromTo('.hero-title', 
+      { y: 60, scale: 0.94, opacity: 0, filter: 'blur(12px)', willChange: 'transform, opacity, filter' },
+      { y: 0, scale: 1, opacity: 1, filter: 'blur(0px)', duration: 1.6, ease: 'power2.out', force3D: true, clearProps: 'filter,willChange' }, 
+      "-=2.4"
+    ); 
+  }
+
+  // ==============================================================
+  // AVVIO A PROVA DI BOMBA: Supporta sia caricamento normale che Astro SPA
+  // ==============================================================
+  function safeInit() {
+    if (window.__loaderInitialized) return;
+    window.__loaderInitialized = true;
+    initLoader();
+  }
+
+  // Intercetta il caricamento classico
+  if (document.readyState === 'complete') {
+    safeInit();
+  } else {
+    window.addEventListener('load', safeInit);
+  }
+  
+  // Intercetta la navigazione interna di Astro
+  document.addEventListener('astro:page-load', () => {
+    window.__loaderInitialized = false; // reset per consentire il re-trigger
+    safeInit();
+  });
+</script>

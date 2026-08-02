@@ -1,0 +1,119 @@
+---
+interface Props {
+  items?: string[];
+  marginTop?: string;
+}
+const { 
+  items = ["INTERACTION DESIGN", "GLSL SHADERS", "VISUAL DESIGN", "USER EXPERIENCE", "CREATIVE CODING", "TOUCHDESIGNER"],
+  marginTop = "mt-0 sm:mt-0 md:mt-0" // <--- Modifica qui per gestire manualmente la distanza dall'Hero
+} = Astro.props;
+
+// Duplichiamo l'array per avere un tracciato lungo e garantire un loop infinito invisibile
+const repeatedItems = Array(6).fill(items).flat();
+---
+
+<!-- 
+  WRAPPER FULL-BLEED CON DISTANZA E DOPPIA LINEA: 
+  - w-screen + left-1/2 -translate-x-1/2 evade dai margini del sito.
+  - {marginTop} ti stacca fisicamente dalla sezione Hero.
+  - border-y crea la linea sia sopra che sotto.
+-->
+<div class={`w-screen relative left-1/2 -translate-x-1/2 ${marginTop} py-8 border-y border-zinc-900 overflow-hidden bg-zinc-950/50 select-none`}>
+  
+  <!-- Aumentato il gap (gap-16/24/32) per dare molto più respiro tra le parole -->
+  <div id="marquee-track" class="flex gap-16 sm:gap-24 md:gap-32 whitespace-nowrap uppercase font-mono text-sm md:text-base tracking-widest text-zinc-400 font-bold will-change-transform w-max items-center">
+    {repeatedItems.map((item, index) => (
+      <span class="flex items-center gap-16 sm:gap-24 md:gap-32">
+        <!-- Parola singola targhettata da GSAP per il contrasto dimensionale -->
+        <span data-marquee-word data-index={index} class="inline-block transition-colors duration-300 cursor-default transform-gpu">
+          {item}
+        </span>
+        <!-- Puntino separatore originale intatto -->
+        <span class="w-1.5 h-2.5 rounded-full bg-zinc-600 inline-block shrink-0"></span>
+      </span>
+    ))}
+  </div>
+
+</div>
+
+<script>
+  import gsap from 'gsap';
+
+  function initGsapMarquee() {
+    const track = document.getElementById('marquee-track');
+    const words = document.querySelectorAll('[data-marquee-word]') as NodeListOf<HTMLElement>;
+
+    if (!track || words.length === 0) return;
+
+    const totalUniqueItems = 6; // Lunghezza dell'array originale
+    // Partiamo dall'esatta metà dell'array duplicato per avere infinito margine di scorrimento
+    let currentIndex = totalUniqueItems * 3; 
+
+    function stepToWord(index: number, duration = 0.8) {
+      const activeWord = words[index];
+      if (!activeWord) return;
+
+      // 1. Calcolo geometrico: trova la posizione X per centrare millimetricamente la parola attiva
+      const viewportCenter = window.innerWidth / 2;
+      const wordCenter = activeWord.offsetLeft + (activeWord.offsetWidth / 2);
+      const targetX = viewportCenter - wordCenter;
+
+      // 2. Anima il binario
+      gsap.to(track, {
+        x: targetX,
+        duration: duration,
+        ease: "power3.out",
+        overwrite: "auto"
+      });
+
+      // 3. CONTRASTO ESTREMO: La parola al centro esplode (scale 1.6), le altre si rimpiccioliscono (scale 0.8)
+      words.forEach((word, idx) => {
+        if (idx === index) {
+          gsap.to(word, {
+            scale: 1.6,
+            color: "#ffffff", // Bianco luminoso al centro
+            duration: duration,
+            ease: "back.out(1.5)",
+            overwrite: "auto"
+          });
+        } else {
+          gsap.to(word, {
+            scale: 0.8,
+            color: "#88888e", // Il tuo colore text-zinc-400 originale intatto
+            duration: 0.5,
+            ease: "power2.out",
+            overwrite: "auto"
+          });
+        }
+      });
+    }
+
+    // Posizionamento iniziale immediato (durata 0s per evitare salti al caricamento)
+    setTimeout(() => stepToWord(currentIndex, 0), 50);
+
+    // MOTORE A SCATTI: movimento verso destra ogni 2 secondi
+    const interval = setInterval(() => {
+      currentIndex--; // Diminuendo l'indice, il binario scorre visivamente verso destra
+
+      // Reset silenzioso e invisibile del loop infinito per non finire mai le parole
+      if (currentIndex < totalUniqueItems) {
+        currentIndex += totalUniqueItems * 2;
+        stepToWord(currentIndex, 0);
+
+        requestAnimationFrame(() => {
+          currentIndex--;
+          stepToWord(currentIndex, 0.8);
+        });
+      } else {
+        stepToWord(currentIndex, 0.8);
+      }
+    }, 1200);
+
+    // Ricalcola il centro se l'utente ridimensiona la finestra
+    window.addEventListener('resize', () => stepToWord(currentIndex, 0));
+  }
+
+  // Avvia all'avertura e dopo ogni navigazione Astro
+  document.addEventListener('DOMContentLoaded', initGsapMarquee);
+  document.addEventListener('astro:page-load', initGsapMarquee);
+</script>

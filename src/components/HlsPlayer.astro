@@ -1,0 +1,86 @@
+---
+interface Props {
+  src: string;
+  title?: string;
+  poster?: string;
+}
+
+const { src, title = "Video Portfolio", poster } = Astro.props;
+---
+
+<div class="relative w-full overflow-hidden rounded-2xl bg-zinc-900 aspect-video shadow-2xl border border-zinc-800/50">
+  <video
+    data-hls-player
+    data-src={src}
+    poster={poster}
+    class="w-full h-full object-cover"
+    crossorigin="anonymous"
+    playsinline
+    controls
+  ></video>
+</div>
+
+<script>
+  import Plyr from 'plyr';
+  import Hls from 'hls.js';
+
+  function initPlayers() {
+    const players = document.querySelectorAll('video[data-hls-player]');
+
+    players.forEach((videoElement) => {
+      const video = videoElement as HTMLVideoElement;
+      const source = video.dataset.src;
+
+      if (!source) return;
+
+      // Previene doppie inizializzazioni durante i cambi pagina
+      if (video.hasAttribute('data-init-done')) return;
+      video.setAttribute('data-init-done', 'true');
+
+      // Caso 1: Browser con supporto HLS nativo (es. Safari su macOS/iOS)
+      if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = source;
+        new Plyr(video, {
+          controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+        });
+      } 
+      // Caso 2: Chrome, Firefox, Edge (Utilizzano Hls.js per decodificare il .m3u8)
+      else if (Hls.isSupported()) {
+        const hls = new Hls({
+          startLevel: -1, 
+          capLevelToPlayerSize: true, 
+        });
+        
+        hls.loadSource(source);
+        hls.attachMedia(video);
+        
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          new Plyr(video, {
+            controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+          });
+        });
+
+        // ==========================================
+        // LA TUA LOGICA DI BYPASS HLS
+        // ==========================================
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          if (data.fatal) {
+            console.warn("Bypass HLS: Video bloccato. Forzo il ricaricamento totale...");
+            hls.destroy();
+            video.removeAttribute('data-init-done');
+            video.src = '';
+            
+            // Aspetta mezzo secondo e riscarica tutto
+            setTimeout(() => {
+              initPlayers();
+            }, 500);
+          }
+        });
+      }
+    });
+  }
+
+  // Esegui all'avvio e supporta le transizioni di pagina future
+  document.addEventListener('DOMContentLoaded', initPlayers);
+  document.addEventListener('astro:page-load', initPlayers);
+</script>

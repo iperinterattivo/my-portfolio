@@ -1,0 +1,121 @@
+---
+import FooterShaderCanvas from './FooterShaderCanvas.astro';
+---
+
+<!-- Footer principale -->
+<footer id="contacts" class="w-screen relative left-1/2 -translate-x-1/2 overflow-hidden py-12 sm:py-16 px-6 sm:px-10 lg:px-16">
+
+  <!-- GRADIENTE DI TRANSIZIONE DALL'ALTO -->
+  <div class="absolute top-0 left-0 w-full h-64 sm:h-80 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent -z-10 pointer-events-none"></div>
+
+  <!-- BACKGROUND SHADER (Livello 0) -->
+  <div class="absolute inset-0 w-full h-full -z-20 pointer-events-none">
+    <FooterShaderCanvas />
+  </div>
+
+  <!-- CONTENUTI FOOTER (Livello 1 - mix-blend-difference attivato) -->
+  <div class="relative z-10 w-full mix-blend-difference text-white">
+    
+    <div class="max-w-17xl mx-auto mt-12 sm:mt-24 mb-12 sm:mb-20 px-0 text-left">
+      
+      <!-- Contenitore di stato -->
+      <div class="flex items-center gap-4 text-xs font-mono uppercase tracking-widest opacity-50 mb-6 sm:mb-8">
+      </div>
+
+      <h2 class="font-display font-black text-[18vw] sm:text-7xl md:text-8xl lg:text-[9.5rem] leading-[0.85] tracking-tighter text-white group-hover:text-white/80 transition-all duration-500 flex items-center justify-start gap-4">
+        <span>Let's get</span>
+        <span class="text-4xl sm:text-6xl md:text-8xl font-light group-hover:translate-x-6 group-hover:-translate-y-6 transition-transform duration-500"></span>
+      </h2>
+      
+      <h2 class="footer-in-touch font-display font-black text-[18vw] sm:text-7xl md:text-8xl lg:text-[9.5rem] leading-[0.85] tracking-tighter text-white group-hover:text-white/80 transition-colors duration-500">
+        in touch.
+      </h2>
+
+      <!-- Sezione Centrale Contatti (Email) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mt-8 sm:mt-16">
+        <div class="lg:col-span-8">
+          <span class="font-mono text-xs uppercase tracking-widest text-white block mb-3 sm:mb-4">// DIRECT E-MAIL TRANSMISSION</span>
+          <a 
+            href="mailto:scigliutoe@gmail.com" 
+            class="font-display font-bold text-3xl sm:text-5xl md:text-6xl text-white hover:text-white/70 transition-colors underline decoration-white/20 hover:decoration-white underline-offset-[8px] sm:underline-offset-[12px] break-all block"
+          >
+            scigliutoe@gmail.com
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- BACCHETTA SEPARATRICE E GRIGLIA INFO CON MIX-BLEND-DIFFERENCE ATTIVO SU TUTTI I TESTI -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 pt-12 sm:pt-16 border-t border-white/40 font-mono text-xs text-white uppercase tracking-widest">
+      <div>
+        <span class="text-white block mb-2">// BASED IN</span>
+        <p class="text-white font-sans text-sm font-normal">Roma–Firenze, Italia</p>
+      </div>
+
+      <div>
+        <span class="text-white block mb-2">// WHAT I DO</span>
+        <p class="font-sans text-sm text-white normal-case">
+          Visual & Interaction Design, Multimedia Development, Motion Graphics, Arduino & Hardware 
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initFooterAnimation() {
+    const target = document.querySelector('.footer-in-touch');
+    const triggerEl = document.querySelector('#contacts');
+
+    if (!target || !triggerEl) return;
+
+    const anim = gsap.fromTo(target, 
+      { 
+        x: -150, 
+        opacity: 0 
+      },
+      {
+        x: 0,
+        opacity: 1,
+        duration: 2.2,
+        ease: 'power3.out',
+        paused: true,
+        force3D: true,
+        clearProps: 'transform,willChange'
+      }
+    );
+
+    ScrollTrigger.create({
+      trigger: triggerEl,
+      start: 'top 85%',
+      onEnter: () => anim.play(),
+      onLeaveBack: () => anim.reverse()
+    });
+
+    document.querySelectorAll('a[href*="#contacts"]').forEach(link => {
+      link.addEventListener('click', () => {
+        setTimeout(() => anim.play(), 150);
+      });
+    });
+
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 200);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFooterAnimation);
+  } else {
+    initFooterAnimation();
+  }
+  
+  document.addEventListener('astro:page-load', () => {
+    initFooterAnimation();
+    setTimeout(() => ScrollTrigger.refresh(), 300);
+  });
+</script>

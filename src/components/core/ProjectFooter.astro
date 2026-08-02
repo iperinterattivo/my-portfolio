@@ -1,0 +1,127 @@
+---
+interface Props {
+  prevProject: any;
+  nextProject: any;
+}
+
+const { prevProject, nextProject } = Astro.props;
+---
+
+<!-- 👇 AGGIUNTO w-screen relative left-1/2 -translate-x-1/2 PER IL FULL-BLEED -->
+<footer class="w-screen relative left-1/2 -translate-x-1/2 bg-[#050505] text-[#e5e5e5] pt-16 sm:pt-24 pb-12 overflow-hidden border-t border-zinc-900 block shrink-0">
+  
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 md:px-10 lg:px-12 mb-20 sm:mb-28">
+    <div class="flex justify-between items-center font-mono text-xs uppercase tracking-widest text-zinc-500 mb-10 border-b border-zinc-900 pb-4">
+      <span> </span>
+      <!-- Il link /#work porterà alla root e lo script si occuperà dello smooth scroll -->
+      <a href="/#work" class="hover:text-white transition-colors underline decoration-zinc-700 underline-offset-4">
+        VEDI TUTTI I PROGETTI [↑]
+      </a>
+    </div>
+
+    <!-- Griglia 2 Colonne Progetti Vicini -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:gap-14">
+      
+      <!-- CARD PRECEDENTE -->
+      {prevProject && (
+        <a href={`/works/${prevProject.slug}`} class="group block select-none border border-zinc-900/80 p-5 sm:p-6 hover:border-zinc-500 bg-zinc-950/50 transition-all duration-500">
+          <div class="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-zinc-500 mb-4 group-hover:text-zinc-300 transition-colors">
+            <span class="text-base group-hover:-translate-x-1 transition-transform duration-300">←</span>
+            <span>PROGETTO PRECEDENTE</span>
+          </div>
+
+          <!-- Preview 16:9 -->
+          <div class="relative aspect-video bg-zinc-900 overflow-hidden mb-6 border border-zinc-800">
+            {prevProject.entry.coverImage ? (
+              <img 
+                src={prevProject.entry.coverImage} 
+                alt={prevProject.entry.title} 
+                class="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 block"
+              />
+            ) : (
+              <div class="w-full h-full flex items-center justify-center font-mono text-xs text-zinc-600 uppercase">
+                [ NO PREVIEW ]
+              </div>
+            )}
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <span class="font-mono text-[10px] uppercase tracking-widest text-white border border-white px-3 py-1 bg-black/80">
+                APRI CASE STUDY
+              </span>
+            </div>
+          </div>
+
+          <!-- Metadati e Titolo Scalato Anti-Truncate -->
+          <div>
+            <span class="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-1.5">
+              // {prevProject.entry.category || 'URBANFRAME STUDIO'}
+            </span>
+            <h3 class="font-display font-black text-xl sm:text-2xl md:text-3xl lg:text-4xl uppercase tracking-tight text-zinc-300 group-hover:text-white transition-colors leading-snug break-words whitespace-normal">
+              {prevProject.entry.title}
+            </h3>
+          </div>
+        </a>
+      )}
+
+      <!-- CARD SUCCESSIVA -->
+      {nextProject && (
+        <a href={`/works/${nextProject.slug}`} class="group block select-none border border-zinc-900/80 p-5 sm:p-6 hover:border-zinc-500 bg-zinc-950/50 transition-all duration-500 md:text-right">
+          <div class="flex items-center justify-start md:justify-end gap-2 font-mono text-xs uppercase tracking-widest text-zinc-500 mb-4 group-hover:text-zinc-300 transition-colors">
+            <span>PROGETTO SUCCESSIVO</span>
+            <span class="text-base group-hover:translate-x-1 transition-transform duration-300">→</span>
+          </div>
+
+          <!-- Preview 16:9 -->
+          <div class="relative aspect-video bg-zinc-900 overflow-hidden mb-6 border border-zinc-800">
+            {nextProject.entry.coverImage ? (
+              <img 
+                src={nextProject.entry.coverImage} 
+                alt={nextProject.entry.title} 
+                class="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 block"
+              />
+            ) : (
+              <div class="w-full h-full flex items-center justify-center font-mono text-xs text-zinc-600 uppercase">
+                [ NO PREVIEW ]
+              </div>
+            )}
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <span class="font-mono text-[10px] uppercase tracking-widest text-white border border-white px-3 py-1 bg-black/80">
+                APRI CASE STUDY
+              </span>
+            </div>
+          </div>
+
+          <!-- Metadati e Titolo Scalato Anti-Truncate -->
+          <div>
+            <span class="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-1.5">
+              // {nextProject.entry.category || 'URBANFRAME STUDIO'}
+            </span>
+            <h3 class="font-display font-black text-xl sm:text-2xl md:text-3xl lg:text-4xl uppercase tracking-tight text-zinc-300 group-hover:text-white transition-colors leading-snug break-words whitespace-normal">
+              {nextProject.entry.title}
+            </h3>
+          </div>
+        </a>
+      )}
+
+    </div>
+  </div>
+
+  <!-- Info Griglia e Copyright (Coerente con il resto del sito) -->
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 md:px-10 lg:px-12 grid grid-cols-1 md:grid-cols-4 gap-12 pt-12 border-t border-zinc-900/80 font-mono text-xs text-zinc-400 uppercase tracking-widest">
+    <div>
+      <span class="text-zinc-600 block mb-2">// POSIZIONE</span>
+      <p class="text-white font-sans text-sm font-normal">Roma–Firenze, Italia </p>
+    </div>
+
+    <div>
+      <span class="text-zinc-600 block mb-2">// WHAT I DO</span>
+      <p class="font-sans text-sm text-zinc-500 normal-case">
+          Visual & Interaction Design, Multimedia Development, Motion Graphics, Arduino & Hardware 
+      </p>
+    </div>
+
+    <div class="md:text-right flex flex-col justify-between md:col-start-4">
+      <span class="text-zinc-600 block mb-2">// COPYRIGHT</span>
+      <p class="font-sans text-sm text-zinc-500">© {new Date().getFullYear()} — Enrico Scigliuto.</p>
+    </div>
+  </div>
+</footer>

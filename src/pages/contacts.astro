@@ -1,0 +1,47 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Footer from '../components/core/Footer.astro';
+---
+
+<Layout title="Contacts | Start a Project with Enrico">
+  <div class="pt-36 pb-20 min-h-[80vh] flex flex-col justify-between">
+    
+    <!-- Intestazione Contatti -->
+    <header class="border-b border-zinc-900 pb-16 mb-20">
+      <div class="flex items-center gap-4 font-mono text-xs uppercase tracking-widest text-zinc-500 mb-8">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>DISPONIBILE PER PROGETTI SELEZIONATI</span>
+      </div>
+      <h1 class="font-display font-black text-6xl sm:text-8xl md:text-9xl tracking-tighter uppercase text-white leading-[0.85]">
+        INITIATE <br /><span class="text-zinc-600">CONTACT.</span>
+      </h1>
+    </header>
+
+    <!-- Sezione Centrale Contatti -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center my-auto">
+      <div class="lg:col-span-8">
+        <span class="font-mono text-xs uppercase tracking-widest text-zinc-500 block mb-4">// DIRECT E-MAIL TRANSMISSION</span>
+        <a 
+          href="mailto:avvia_progetto@portfolio.dev" 
+          class="font-display font-bold text-3xl sm:text-5xl md:text-6xl text-white hover:text-zinc-400 transition-colors underline decoration-zinc-800 hover:decoration-white underline-offset-[12px] break-all block"
+        >
+          avvia_progetto@portfolio.dev ↗
+        </a>
+      </div>
+
+      <div class="lg:col-span-4 lg:text-right font-mono text-xs text-zinc-500 space-y-4">
+        <div>
+          <span class="block text-zinc-600">// BASE OPERATIVA</span>
+          <span class="text-zinc-300">Milano, Italia // CET / CEST Timezone</span>
+        </div>
+        <div>
+          <span class="block text-zinc-600">// TEMPO DI RISPOSTA STIMATO</span>
+          <span class="text-zinc-300">Entro 24 - 48 ore lavorative</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <Footer />
+</Layout>

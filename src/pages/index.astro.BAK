@@ -1,0 +1,54 @@
+---
+import Layout from '../layouts/Layout.astro';
+import HlsPlayer from '../components/media/HlsPlayer.astro';
+import { createReader } from '@keystatic/core/reader';
+import keystaticConfig from '../../keystatic.config';
+
+// Lettura ultra-veloce dei file locali in build-time (SSG)
+const reader = createReader('', keystaticConfig);
+const projects = await reader.collections.projects.all();
+---
+
+<Layout title="Creative Fullstack Portfolio | Selected Works">
+  <section class="mb-24">
+    <h1 class="text-5xl md:text-8xl font-black tracking-tight uppercase mb-6">
+      Selected <br /><span class="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-600"></span>
+    </h1>
+    <p class="text-lg md:text-xl text-zinc-400 max-w-2xl">
+      Un portfolio esperienziale ad alte prestazioni. Nessun database dinamico, solo streaming HLS edge ottimizzato e architettura puramente statica.
+    </p>
+  </section>
+
+  <section class="grid grid-cols-1 gap-20">
+    {projects.length === 0 ? (
+      <div class="p-12 rounded-2xl border border-dashed border-zinc-800 text-center text-zinc-500">
+        <p>Nessun progetto trovato. Apri <a href="/keystatic" class="underline text-white">/keystatic</a> per aggiungere il tuo primo case study con il link R2!</p>
+      </div>
+    ) : (
+      projects.map((project) => (
+        <article class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-7">
+            {project.entry.r2VideoUrl ? (
+              <HlsPlayer 
+                src={project.entry.r2VideoUrl} 
+                title={project.entry.title}
+              />
+            ) : (
+              <div class="aspect-video bg-zinc-900 rounded-2xl flex items-center justify-center border border-zinc-800 text-zinc-600 font-mono text-sm">
+                Nessun URL HLS (.m3u8) inserito nel CMS
+              </div>
+            )}
+          </div>
+          <div class="lg:col-span-5 flex flex-col justify-center space-y-4">
+            <h2 class="text-3xl md:text-4xl font-bold tracking-tight">
+              {project.entry.title}
+            </h2>
+            <p class="text-zinc-400 text-base leading-relaxed">
+              {project.entry.tagline}
+            </p>
+          </div>
+        </article>
+      ))
+    )}
+  </section>
+</Layout>

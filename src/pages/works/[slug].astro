@@ -1,0 +1,86 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ProjectFooter from '../../components/core/ProjectFooter.astro';
+import Lightbox from '../../components/media/Lightbox.astro';
+import MediaRenderer from '../../components/media/MediaRenderer.astro';
+import { createReader } from '@keystatic/core/reader';
+import keystaticConfig from '../../../keystatic.config';
+import Markdoc from '@markdoc/markdoc';
+
+export async function getStaticPaths() {
+  const reader = createReader('', keystaticConfig);
+  const projects = await reader.collections.projects.all();
+  
+  return projects.map((project, index) => {
+    const prevIndex = (index - 1 + projects.length) % projects.length;
+    const nextIndex = (index + 1) % projects.length;
+
+    return {
+      params: { slug: project.slug },
+      props: { 
+        project,
+        prevProject: projects[prevIndex],
+        nextProject: projects[nextIndex]
+      },
+    };
+  });
+}
+
+const { project, prevProject, nextProject } = Astro.props;
+
+// Estrazione e compilazione Markdoc HTML
+const { node } = await project.entry.content();
+const htmlContent = Markdoc.renderers.html(Markdoc.transform(node));
+---
+
+<Layout title={`${project.entry.title} | Portfolio Project`}>
+  <!-- Pulito il padding inferiore per non far scontrare l'ultimo media con il footer -->
+  <article class="pt-36 pb-20 w-full">
+    
+
+    <!-- INTESTAZIONE PROGETTO: Con Interlinea Compatta e Stretta -->
+    <header class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-end mb-16 border-b border-zinc-900 pb-14">
+      <div class="lg:col-span-8">
+        <div class="font-mono text-xs uppercase tracking-widest text-zinc-500 mb-5 flex items-center gap-2">
+          <span class="w-2 h-2 bg-white inline-block"></span>
+          <span>// {project.entry.category || 'INDEPENDENT PRODUCTION'}</span>
+        </div>
+        
+        <!-- 👇 INTERLINEA STRETTA (leading-[0.88]): Crea un blocco compatto da ~24px di spazio tra le righe -->
+        <h1 class="font-display font-black text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tighter uppercase text-white mb-6 leading-[0.88] block break-words">
+          {project.entry.title}
+        </h1>
+
+        <p class="text-xl sm:text-2xl md:text-3xl font-light text-zinc-300 leading-snug">
+          {project.entry.tagline}
+        </p>
+      </div>
+
+      <!-- Descrizione Briefing dal CMS -->
+      <div class="lg:col-span-4 font-sans text-sm md:text-base text-zinc-400 font-normal leading-relaxed border-t lg:border-t-0 lg:border-l border-zinc-900 pt-6 lg:pt-0 lg:pl-12">
+        <span class="font-mono text-[10px] uppercase tracking-widest text-zinc-600 block mb-3">[ BRIEFING & STORY ]</span>
+        <div class="space-y-4 [&>p]:leading-relaxed [&>p]:text-zinc-400 [&>strong]:text-white [&>strong]:font-semibold" set:html={htmlContent} />
+      </div>
+    </header>
+
+    <!-- MOTORE MODULARE: Spaziature dimezzate e flusso di rendering pulito -->
+    {project.entry.mediaFlow && project.entry.mediaFlow.length > 0 ? (
+      <section class="w-full">
+        {project.entry.mediaFlow.map((block) => (
+          <MediaRenderer block={block} />
+        ))}
+      </section>
+    ) : (
+      <div class="p-16 border border-dashed border-zinc-800 text-center font-mono text-zinc-600 rounded-xl">
+        Nessun modulo di layout inserito. Apri il CMS per aggiungere Hero, Griglie, Trittici o Bento Grid.
+      </div>
+    )}
+
+  </article>
+
+  <!-- Popup Lightbox -->
+  <Lightbox />
+
+  <!-- Footer Progetti Navigazione Circolare -->
+  <ProjectFooter prevProject={prevProject} nextProject={nextProject} />
+</Layout>

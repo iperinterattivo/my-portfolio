@@ -1,0 +1,92 @@
+---
+import '../styles/global.css';
+import Loader from '../components/core/Loader.astro';
+import { ClientRouter } from 'astro:transitions'; 
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Enrico Scigliuto | Creative Technologist" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="it" class="dark font-sans overflow-x-hidden">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/Icon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    
+    <!-- Router SPA nativo per Astro 5+ -->
+    <ClientRouter />
+  </head>
+  
+  <body class="min-h-screen bg-[#0a0a0a] text-[#e5e5e5] selection:bg-white selection:text-black relative overflow-x-hidden w-full">
+    
+    <Loader />
+
+    <div class="fixed inset-0 pointer-events-none z-50 opacity-[0.035] bg-noise"></div>
+
+    <header class="fixed top-0 left-0 w-full z-40 py-6 px-5 sm:px-8 md:px-10 lg:px-12 flex justify-between items-center mix-blend-difference">
+      
+      <a href="/" class="reveal-ui opacity-0 translate-y-4 text-sm font-bold tracking-tighter font-display">
+        ENRICO SCIGLIUTO<span class="text-zinc-500"></span>
+      </a>
+      
+      <nav class="reveal-ui opacity-0 translate-y-4 flex items-center gap-6 sm:gap-8 text-xs uppercase tracking-widest font-medium text-zinc-400">
+        <a href="/#work" class="hover:text-white transition-colors">Works</a>
+        <a href="/#about" class="hover:text-white transition-colors">About Me</a>
+        <a href="/#contacts" class="hover:text-white transition-colors">Contacts</a>
+      </nav>
+      
+    </header>
+
+    <main class="relative z-10 w-full max-w-[1920px] mx-auto px-5 sm:px-8 md:px-10 lg:px-12">
+      <slot />
+    </main>
+
+    <!-- FIX SCROLL PER ANCORE CON VIEW TRANSITIONS E LAYOUT SHIFT -->
+    <script>
+      let isAstroNavigation = false;
+
+      // Intercettiamo la navigazione SPA di Astro
+      document.addEventListener('astro:before-preparation', () => {
+        isAstroNavigation = true;
+      });
+
+      document.addEventListener('astro:page-load', () => {
+        const hash = window.location.hash;
+        
+        // 1. GESTIONE SALTO DA UN PROGETTO ALLA HOMEPAGE
+        if (isAstroNavigation && hash) {
+          const target = document.querySelector(hash);
+          if (target) {
+            // Assicuriamoci che l'effetto elastico sia spento
+            document.documentElement.classList.remove('scroll-smooth');
+            // Teletrasporto immediato all'ancora (es. Works)
+            target.scrollIntoView({ behavior: 'auto', block: 'start' });
+          }
+        }
+        
+        // 2. IL FIX PER IL REFRESH (F5)
+        // Aspettiamo 150 millisecondi prima di riattivare lo smooth-scroll globale.
+        // Questo dà tempo a Chrome di ripristinare istantaneamente il tuo scroll 
+        // esattamente dove ti trovavi prima di premere F5, senza farti bloccare sull'Hero!
+        setTimeout(() => {
+          document.documentElement.classList.add('scroll-smooth');
+        }, 150);
+
+        // Reset per la prossima navigazione
+        isAstroNavigation = false;
+      });
+    </script>
+  </body>
+</html>

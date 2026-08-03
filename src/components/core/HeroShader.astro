@@ -41,8 +41,8 @@ const { class: className = "" } = Astro.props;
     renderer.setPixelRatio(pixelRatio);
     renderer.autoClear = false;
 
-    // Scaliamo dinamicamente il pennello in base al dispositivo
-    const dynamicThickness = isMobile ? 0.02 : 0.035;
+    // Rimpicciolito il cursore/spessore del pennello su mobile (da 0.02 a 0.01)
+    const dynamicThickness = isMobile ? 0.01 : 0.035;
 
     const simSize = 1024/2;
     const renderTargetParams = {
@@ -118,14 +118,13 @@ const { class: className = "" } = Astro.props;
       float getElevation(vec2 uvCoord, float time, vec2 resolution, sampler2D trailTex) {
         float trailIntensity = texture2D(trailTex, uvCoord).r;
         
-        float resRatio = resolution.x / resolution.y;
-        vec2 uvCover = vec2(
-          uvCoord.x * max(resRatio, 1.0),
-          uvCoord.y * max(1.0 / resRatio, 1.0)
-        );
+        float aspect = resolution.x / resolution.y;
+        // Moltiplicatore dinamico: rimpicciolisce la scala UV su mobile (format verticale)
+        float uvScale = aspect < 1.0 ? (1.0 / aspect) * 1.2 : 1.0;
+        
+        vec2 uvCover = (uvCoord - 0.5) * vec2(max(aspect, 1.0), max(1.0 / aspect, 1.0)) * uvScale + 0.5;
 
         float pulseTime = time * 1.2;
-        vec2 randomCenter = hash2D(vec2(floor(pulseTime / 6.28318), 78.23)) * uvCover;
         float pulseEnvelope = atan(sin(pulseTime)) * .5 + 0.75;
         
         float fluidPattern = fluidNoise(uvCover * 3.0, time * 0.8);
@@ -150,115 +149,114 @@ const { class: className = "" } = Astro.props;
     `;
 
     const fragmentShader = `
-  uniform float u_time;
-  uniform vec2 u_resolution;
-  uniform vec2 u_mouse;
-  uniform sampler2D u_trail;
+      uniform float u_time;
+      uniform vec2 u_resolution;
+      uniform vec2 u_mouse;
+      uniform sampler2D u_trail;
 
-  varying vec2 vUv;
-  varying float vDisplacement;
+      varying vec2 vUv;
+      varying float vDisplacement;
 
-  vec2 hash2D(vec2 p) {
-    p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
-    return fract(sin(p) * 43758.5453123);
-  }
+      vec2 hash2D(vec2 p) {
+        p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+        return fract(sin(p) * 43758.5453123);
+      }
 
-  float noise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    return mix(mix(dot(hash2D(i + vec2(0.0,0.0)), f - vec2(0.0,0.0)),
-                   dot(hash2D(i + vec2(1.0,0.0)), f - vec2(1.0,0.0)), u.x),
-               mix(dot(hash2D(i + vec2(0.0,1.0)), f - vec2(0.0,1.0)),
-                   dot(hash2D(i + vec2(1.0,1.0)), f - vec2(1.0,1.0)), u.x), u.y);
-  }
+      float noise(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(mix(dot(hash2D(i + vec2(0.0,0.0)), f - vec2(0.0,0.0)),
+                       dot(hash2D(i + vec2(1.0,0.0)), f - vec2(1.0,0.0)), u.x),
+                   mix(dot(hash2D(i + vec2(0.0,1.0)), f - vec2(0.0,1.0)),
+                       dot(hash2D(i + vec2(1.0,1.0)), f - vec2(1.0,1.0)), u.x), u.y);
+      }
 
-  float fluidNoise(vec2 p, float time) {
-    vec2 q = vec2(noise(p + vec2(0.0, time * 0.2)), noise(p + vec2(5.2, time * 0.13)));
-    vec2 r = vec2(noise(p + 4.0 * q + vec2(1.7 - time * 0.15, 9.2 + time * 0.15)),
-                  noise(p + 4.0 * q + vec2(8.3 - time * 0.1, 2.8 + time * 0.2)));
-    return noise(p + 2.5 * r);
-  }
+      float fluidNoise(vec2 p, float time) {
+        vec2 q = vec2(noise(p + vec2(0.0, time * 0.2)), noise(p + vec2(5.2, time * 0.13)));
+        vec2 r = vec2(noise(p + 4.0 * q + vec2(1.7 - time * 0.15, 9.2 + time * 0.15)),
+                      noise(p + 4.0 * q + vec2(8.3 - time * 0.1, 2.8 + time * 0.2)));
+        return noise(p + 2.5 * r);
+      }
 
-  float getElevation(vec2 uv, float time, vec2 resolution, sampler2D trail) {
-    vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
-    vec2 uvScaled = uv * aspect;
-    float pulseSpeed = 1.2;
-    float pulseTime = time * pulseSpeed;
-    float cycleIndex = floor(pulseTime / (2.0 * 3.14159265));
-    vec2 randomCenter = hash2D(vec2(cycleIndex, 78.23)) * aspect;
-    float distFromRandom = length(uvScaled);
-    float pulseEnvelope = sin(pulseTime) * 0.5 + 0.75;
-    float fluidPattern = fluidNoise(uvScaled * 6.0, time * 0.8);
-    float wavePattern = sin(distFromRandom * 8.0 - time * 2.5 + fluidPattern * 4.0) * 0.5 + 0.5;
-    return wavePattern * pulseEnvelope * (1.0 + fluidPattern * 0.5);
-  }
+      float getElevation(vec2 uv, float time, vec2 resolution, sampler2D trail) {
+        float aspect = resolution.x / resolution.y;
+        float uvScale = aspect < 1.0 ? (1.0 / aspect) * 1.4 : 1.0;
+        vec2 uvScaled = (uv - 0.5) * vec2(max(aspect, 1.0), max(1.0 / aspect, 1.0)) * uvScale + 0.5;
 
-  vec3 ACESFilm(vec3 x) {
-    float a = 2.51;
-    float b = 0.03;
-    float c = 2.43;
-    float d = 0.59;
-    float e = 0.14;
-    return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
-  }
+        float pulseSpeed = 1.2;
+        float pulseTime = time * pulseSpeed;
+        float distFromRandom = length(uvScaled);
+        float pulseEnvelope = sin(pulseTime) * 0.5 + 0.75;
+        float fluidPattern = fluidNoise(uvScaled * 6.0, time * 0.8);
+        float wavePattern = sin(distFromRandom * 8.0 - time * 2.5 + fluidPattern * 4.0) * 0.5 + 0.5;
+        return wavePattern * pulseEnvelope * (1.0 + fluidPattern * 0.5);
+      }
 
-  float randomDither(vec2 p) {
-    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
-  }
+      vec3 ACESFilm(vec3 x) {
+        float a = 2.51;
+        float b = 0.03;
+        float c = 2.43;
+        float d = 0.59;
+        float e = 0.14;
+        return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+      }
 
-  void main() {
-    float blend = clamp(vDisplacement, 0.0, 1.0);
-    vec3 colorBaseDark = vec3(0.04, 0.04, 0.05);
-    vec3 colorSilver = vec3(0.55, 0.58, 0.62);
-    vec3 colorChromeHighlight = vec3(0.92, 0.95, 0.98);
+      float randomDither(vec2 p) {
+        return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
+      }
 
-    vec3 aluminumBase = mix(colorBaseDark, colorSilver, smoothstep(0.05, 0.45, blend));
-    aluminumBase = mix(aluminumBase, colorChromeHighlight, smoothstep(0.45, 0.85, blend));
+      void main() {
+        float blend = clamp(vDisplacement, 0.0, 1.0);
+        vec3 colorBaseDark = vec3(0.04, 0.04, 0.05);
+        vec3 colorSilver = vec3(0.55, 0.58, 0.62);
+        vec3 colorChromeHighlight = vec3(0.92, 0.95, 0.98);
 
-    // ESTIAMO LA SCIA PURA PER CREARE LA RIFRAZIONE
-    float rawTrail = texture2D(u_trail, vUv).r;
+        vec3 aluminumBase = mix(colorBaseDark, colorSilver, smoothstep(0.05, 0.45, blend));
+        aluminumBase = mix(aluminumBase, colorChromeHighlight, smoothstep(0.45, 0.85, blend));
 
-    // Colori prismatici animati basati sul tempo
-    float waveOffset = blend * 6.28318 - (u_time * 3.0);
-    vec3 rgbDispersion = vec3(
-      sin(waveOffset) * 1.5 + 0.5, 
-      sin(waveOffset + 2.094) * 0.75 + 0.5, 
-      sin(waveOffset + 4.188) * 0.75 + 0.5
-    );
-    
-    vec3 baseColor = aluminumBase + (rgbDispersion * smoothstep(0.15, .90, blend));
+        // ESTRAIAMO LA SCIA PURA PER CREARE LA RIFRAZIONE
+        float rawTrail = texture2D(u_trail, vUv).r;
 
-    // INIEZIONE RIFRAZIONE: Colori olografici brillanti miscelati esattamente dove passi il mouse
-    vec3 refractionGlow = rgbDispersion * 1.5; 
-    baseColor = mix(baseColor, refractionGlow, rawTrail * smoothstep(0.1, 1.0, rawTrail));
+        // Colori prismatici animati basati sul tempo
+        float waveOffset = blend * 6.28318 - (u_time * 3.0);
+        vec3 rgbDispersion = vec3(
+          sin(waveOffset) * 1.5 + 0.5, 
+          sin(waveOffset + 2.094) * 0.75 + 0.5, 
+          sin(waveOffset + 4.188) * 0.75 + 0.5
+        );
+        
+        vec3 baseColor = aluminumBase + (rgbDispersion * smoothstep(0.15, .90, blend));
 
-    float epsilon = 0.009; 
-    float h0 = vDisplacement;
-    float hX = getElevation(vUv + vec2(epsilon, 0.0), u_time, u_resolution, u_trail);
-    float hY = getElevation(vUv + vec2(0.0, epsilon), u_time, u_resolution, u_trail);
-    vec3 normal = normalize(vec3(-(hX - h0) * 20.0, -(hY - h0) * 20.0, 1.0));
+        // INIEZIONE RIFRAZIONE: Colori olografici brillanti miscelati esattamente dove passi il mouse
+        vec3 refractionGlow = rgbDispersion * 1.5; 
+        baseColor = mix(baseColor, refractionGlow, rawTrail * smoothstep(0.1, 1.0, rawTrail));
 
-    vec3 lightDir = normalize(vec3(1.0, 1.0, .5)); 
-    float diffuse = max(dot(normal, lightDir), 0.0);
-    // Aumentiamo lo speculare (luce diretta) dove si trova la scia per farla brillare
-    float specular = pow(max(dot(normal, normalize(lightDir + vec3(0.0, 0.0, 1.0))), 0.0), 32.0); 
+        float epsilon = 0.009; 
+        float h0 = vDisplacement;
+        float hX = getElevation(vUv + vec2(epsilon, 0.0), u_time, u_resolution, u_trail);
+        float hY = getElevation(vUv + vec2(0.0, epsilon), u_time, u_resolution, u_trail);
+        vec3 normal = normalize(vec3(-(hX - h0) * 20.0, -(hY - h0) * 20.0, 1.0));
 
-    vec3 shadedColor = baseColor * (diffuse + 0.35) + vec3(specular * (1.5 + rawTrail * 1.5)) + vec3(pow(smoothstep(0.6, 1.0, blend), 3.0) * 2.45);
+        vec3 lightDir = normalize(vec3(1.0, 1.0, .5)); 
+        float diffuse = max(dot(normal, lightDir), 0.0);
+        float specular = pow(max(dot(normal, normalize(lightDir + vec3(0.0, 0.0, 1.0))), 0.0), 32.0); 
 
-    shadedColor = mix(shadedColor,ACESFilm(shadedColor),1.25);
+        vec3 shadedColor = baseColor * (diffuse + 0.35) + vec3(specular * (1.5 + rawTrail * 1.5)) + vec3(pow(smoothstep(0.6, 1.0, blend), 3.0) * 2.45);
 
-    vec2 uvCentered = vUv * 2.0 - 1.0;
-    float vignette = 1.0 - dot(uvCentered, uvCentered) * 3.22;
-    vignette = smoothstep(0.0, 1.0, vignette);
-    shadedColor *= vignette;
+        shadedColor = mix(shadedColor, ACESFilm(shadedColor), 1.25);
 
-    float dither = randomDither(gl_FragCoord.xy) * (1.0 / 255.0);
-    shadedColor += dither * 52.0;
+        vec2 uvCentered = vUv * 2.0 - 1.0;
+        float vignette = 1.0 - dot(uvCentered, uvCentered) * 3.22;
+        vignette = smoothstep(0.0, 1.0, vignette);
+        shadedColor *= vignette;
 
-    gl_FragColor = vec4(smoothstep(0.02, 0.99, shadedColor / (vec3(1.0) + shadedColor)), 1.0);
-  }
-`;
+        float dither = randomDither(gl_FragCoord.xy) * (1.0 / 255.0);
+        shadedColor += dither * 52.0;
+
+        gl_FragColor = vec4(smoothstep(0.02, 0.99, shadedColor / (vec3(1.0) + shadedColor)), 1.0);
+      }
+    `;
 
     const mainGeometry = new THREE.PlaneGeometry(16, 16, 400, 400);
     const mainMaterial = new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms: mainUniforms, depthWrite: false, depthTest: false });
@@ -266,7 +264,7 @@ const { class: className = "" } = Astro.props;
     mesh.rotation.x = -.322; mesh.rotation.y = 0.04;  
     mainScene.add(mesh);
 
-    // --- 3. EVENTI NATIVI (MODIFICATI PER HOVER SU DESKTOP) ---
+    // --- EVENTI NATIVI ---
     let isDrawing = false;
     const raycaster = new THREE.Raycaster();
     const mouseParams = new THREE.Vector2(-10, -10); 
@@ -282,23 +280,19 @@ const { class: className = "" } = Astro.props;
       mouseParams.y = -((clientY - rect.top) / rect.height) * 2 + 1;
     }
 
-    // Touch / Click innesca sempre il disegno (Per il mobile)
     window.addEventListener('pointerdown', (e) => {
       isDrawing = true;
       updateMouseParams(e);
     }, { passive: true });
     
-    // Fermiamo il disegno al rilascio SE NON È UN MOUSE
     window.addEventListener('pointerup', (e) => {
       if (e.pointerType !== 'mouse') isDrawing = false;
     }, { passive: true });
     
-    // Fermiamo se interviene uno scroll (Mobile)
     window.addEventListener('pointercancel', (e) => {
       if (e.pointerType !== 'mouse') isDrawing = false;
     }, { passive: true });
     
-    // LA MAGIA: Hover su desktop attiva istantaneamente la scia
     window.addEventListener('pointermove', (e) => {
       if (e.pointerType === 'mouse') {
         isDrawing = true;
@@ -306,7 +300,6 @@ const { class: className = "" } = Astro.props;
       updateMouseParams(e);
     }, { passive: true });
 
-    // Sicurezza: Blocca la scia quando il mouse esce fuori dalla finestra
     window.addEventListener('pointerleave', (e) => {
       isDrawing = false;
     }, { passive: true });
@@ -315,8 +308,12 @@ const { class: className = "" } = Astro.props;
       if (!container || !renderer) return;
       const w = container.offsetWidth;
       const h = container.offsetHeight;
-      const dpr = window.innerWidth < 768 ? 1.0 : Math.min(window.devicePixelRatio, 2);
+      const isMob = window.innerWidth < 768;
+      const dpr = isMob ? 1.0 : Math.min(window.devicePixelRatio, 2);
       
+      // Aggiorna anche dynamicThickness al resize
+      simMaterial.uniforms.u_thickness.value = isMob ? 0.01 : 0.035;
+
       renderer.setPixelRatio(dpr);
       renderer.setSize(w, h);
       mainCamera.aspect = w / h;
@@ -325,7 +322,7 @@ const { class: className = "" } = Astro.props;
     }
     window.addEventListener('resize', onResize, { passive: true });
 
-    // --- 4. RENDER LOOP ---
+    // --- RENDER LOOP ---
     let animationFrameId;
 
     function animate(time) {

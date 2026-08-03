@@ -38,7 +38,7 @@ import ShaderCanvas from './HeroShader.astro';
             - font-size="105": ingrandisce al massimo il titolo nel canvas.
           -->
           <text 
-            x="0" 
+            x="-5" 
             y="52%" 
             dominant-baseline="central" 
             textLength="1000" 
@@ -54,7 +54,7 @@ import ShaderCanvas from './HeroShader.astro';
 
       <!-- Ruolo/Qualifica allineato a destra -->
       <p class="reveal-ui opacity-0 translate-y-8 translate-x-4 text-right font-sans font-light text-lg sm:text-2xl md:text-4xl opacity-70 tracking-tight mt-0 md:mt-0 [font-optical-sizing:auto] mr-1 sm:mr-4 md:mr-2 text-white transform-gpu will-change-[transform,opacity]">
-        Creative Technologist
+        <!--Creative Technologist -->
       </p>
     </div>
   </div>
@@ -67,13 +67,14 @@ import ShaderCanvas from './HeroShader.astro';
   -->
   <header 
     id="hero-navbar"
-    class="w-full z-40 py-0 bg-transparent my-4 mix-blend-difference transform-gpu transition-all duration-500 ease-out translate-y--0 opacity-100"
+    class="w-full z-40 py-0 bg-transparent my-1 mix-blend-difference transform-gpu transition-all duration-500 ease-out translate-y-0 opacity-100"
   >
-    <nav class="w-full flex items-center justify-between text-xs uppercase tracking-widest font-medium text-zinc-400">
-      <a href="/#work" class="hover:text-white transition-colors">Works</a>
-      <a href="/#about" class="hover:text-white transition-colors">About Me</a>
-      <a href="/#contacts" class="hover:text-white transition-colors">Contacts</a>
-    </nav>
+  <!-- Navbar reattiva: text-xl su mobile -> text-4xl da md (desktop) -->
+  <nav class="flex items-center justify-between w-full md:w-full text-xl md:text-4xl lowercase tracking-tighter font-medium text-zinc-100 ml-auto">
+    <a href="/#about" class="hover:text-white transition-colors">About Me</a>
+    <a href="/#work" class="hover:text-white transition-colors">Works</a>
+    <a href="/#contacts" class="hover:text-white transition-colors">Contacts</a>
+  </nav>
   </header>
 
   <!-- Spazio centrale Hero -->

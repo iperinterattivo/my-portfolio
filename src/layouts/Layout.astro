@@ -43,14 +43,14 @@ const { title, description = "Enrico Scigliuto | Creative Technologist" } = Astr
       id="main-header"
       class="fixed top-0 left-0 w-full z-40 py-6 px-5 sm:px-8 md:px-10 lg:px-12 flex justify-between items-center mix-blend-difference pointer-events-none transition-transform duration-500 ease-out -translate-y-full"
     >
-      <a href="/" class="reveal-ui text-sm font-bold tracking-tighter font-display uppercase pointer-events-auto">
+      <a href="/" class="reveal-ui text-sm font-bold tracking-wide font-display uppercase pointer-events-auto">
       ENRICO SCIGLIUTO
       </a>
       
       <!-- MENU ESTESO SULLA METÀ DESTRA DELLO SCHERMO -->
-      <nav class="reveal-ui flex items-center justify-between w-full md:w-1/2 text-xs uppercase tracking-widest font-medium text-zinc-400 pointer-events-auto ml-auto pl-4 md:pl-12">
-        <a href="/#work" class="hover:text-white transition-colors">Works</a>
+      <nav class="reveal-ui flex items-center justify-between w-full md:w-2/4 text-xl lowercase tracking-tighter font-medium text-zinc-100 pointer-events-auto ml-auto pl-4 md:pl-12">
         <a href="/#about" class="hover:text-white transition-colors">About Me</a>
+        <a href="/#work" class="hover:text-white transition-colors">Works</a>
         <a href="/#contacts" class="hover:text-white transition-colors">Contacts</a>
       </nav>
     </header>
@@ -70,8 +70,20 @@ const { title, description = "Enrico Scigliuto | Creative Technologist" } = Astr
         const mainHeader = document.getElementById('main-header');
         const heroNavbar = document.getElementById('hero-navbar');
 
-        if (!mainHeader || !heroNavbar) return;
+        // Se non esiste la navbar principale, fermati
+        if (!mainHeader) return;
 
+        // === FIX PER LE PAGINE PROGETTO ===
+        // Se non c'è l'heroNavbar, significa che siamo in una pagina interna.
+        // Mostriamo subito la navbar in alto, rimuoviamo i blocchi e fermiamo lo script.
+        if (!heroNavbar) {
+          mainHeader.classList.remove('-translate-y-full', 'pointer-events-none');
+          mainHeader.classList.add('translate-y-0');
+          return;
+        }
+
+        // === LOGICA ORIGINALE PER LA HOME ===
+        // Se ci sono entrambe, eseguiamo la logica GSAP legata allo scroll
         ScrollTrigger.create({
           start: 'top top+=40',
           onUpdate: (self) => {

@@ -111,10 +111,10 @@ const animatedLoopsItems = data.folderName ? getFolderMedia(data.folderName, 60)
     <div class="flex justify-between items-center font-mono text-xs uppercase tracking-widest text-zinc-500 mb-4 border-b border-zinc-900/50 pb-3 select-none">
     </div>
     
-    {/* SLIDESHOW ORA UNIVERSALE (Ripristinato) */}
-    <mobile-auto-slider class="block relative w-full aspect-video bg-zinc-900 overflow-hidden border border-zinc-800/80">
+    {/* SLIDESHOW UNIVERSALE IN SELEZIONABILE */}
+    <mobile-auto-slider class="block relative w-full aspect-video bg-zinc-900 overflow-hidden border border-zinc-800/80 pointer-events-none select-none">
       {grid8x2Items.map((item: any, idx: number) => (
-        <div data-lightbox-index={!item.isYouTube && !item.isHls ? idx : null} data-src={item.url} class={`slide absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0 z-0 ${!item.isYouTube && !item.isHls ? 'cursor-pointer' : ''}`}>
+        <div data-src={item.url} class={`slide absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0 z-0`}>
           {item.isYouTube || item.isHls ? (
              <MediaElement media={item} />
           ) : item.isLoopVideo ? (
@@ -207,9 +207,9 @@ const animatedLoopsItems = data.folderName ? getFolderMedia(data.folderName, 60)
         // {data.sectionCaption}
       </div>
     )}
-    <div class={`grid ${getReelsGridCols(data.columns, data.mobileLayout?.discriminant === true, data.mobileLayout?.value || '2')}`}>
+    <div class={`grid ${getReelsGridCols(data.columns, data.mobileLayout?.discriminant === true, data.mobileLayout?.value || '2')} pointer-events-none select-none`}>
       {verticalReelsItems.map((item: any) => (
-        <div class={`${getAspectClass(data.aspectRatio || '9-16')} bg-zinc-900 overflow-hidden border border-zinc-800/80 hover:border-zinc-500 transition-colors relative block shrink-0 group`}>
+        <div class={`${getAspectClass(data.aspectRatio || '9-16')} bg-zinc-900 overflow-hidden border border-zinc-800/80 relative block shrink-0`}>
           <MediaElement media={item} />
         </div>
       ))}

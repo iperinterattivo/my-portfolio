@@ -1,19 +1,16 @@
 ---
 ---
 <style>
-  /* Distruzione CSS immediata per la navigazione interna (SPA e successivi accessi) */
-  :global(html.loader-completed) #loader-canvas,
-  :global(html.loader-completed) #fouc-shield {
+  /* Distruzione CSS immediata per la navigazione interna */
+  :global(html.loader-completed) #loader-canvas {
     display: none !important;
   }
 </style>
 
-<!-- Scudo Anti-FOUC: blocco nero solido che copre tutto finché il WebGL non renderizza il 1° frame -->
-<div id="fouc-shield" class="fixed inset-0 z-[10000] bg-[#0a0a0a] pointer-events-none" style="opacity: 1; visibility: visible;"></div>
 <canvas id="loader-canvas" class="fixed inset-0 z-[9999] pointer-events-none"></canvas>
 
 <script is:inline>
-  // Blocca lo scroll e gestisce lo scudo al primissimo parsing dell'HTML
+  // Blocca lo scroll solo ed esclusivamente al primissimo caricamento
   if (typeof sessionStorage !== 'undefined') {
     if (sessionStorage.getItem('loaderPlayed') === 'true') {
       document.documentElement.classList.add('loader-completed');
@@ -36,9 +33,6 @@
     // ==============================================================
     if (sessionStorage.getItem('loaderPlayed') === 'true') {
       if (canvas) canvas.remove();
-      const shield = document.getElementById('fouc-shield');
-      if (shield) shield.remove();
-      
       document.body.style.overflow = '';
       
       // La tua UI DEVE animarsi comunque in ogni pagina (Navbar ecc.)
@@ -115,18 +109,8 @@
     resize();
 
     let reqId: number;
-    let isFirstFrame = true;
-
     function render() {
       renderer.render(scene, camera);
-      
-      // IL TRUCCO DEFINITIVO: Rimuove lo scudo solo e soltanto quando il WebGL ha disegnato il primo frame nero
-      if (isFirstFrame) {
-        const shield = document.getElementById('fouc-shield');
-        if (shield) shield.remove();
-        isFirstFrame = false;
-      }
-
       reqId = requestAnimationFrame(render);
     }
     render();
